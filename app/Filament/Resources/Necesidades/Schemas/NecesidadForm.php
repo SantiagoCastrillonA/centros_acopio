@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Necesidades\Schemas;
 
+use App\Models\Item;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Get;
@@ -10,6 +11,17 @@ use Illuminate\Validation\Rules\Unique;
 
 class NecesidadForm
 {
+    private const CATEGORIAS = [
+        'agua' => '💧 Agua',
+        'alimento' => '🍚 Alimento',
+        'habitat' => '🏕️ Hábitat y descanso',
+        'higiene' => '🧼 Higiene',
+        'bebe' => '🍼 Bebés y niños',
+        'salud' => '🩺 Salud',
+        'herramienta' => '🔦 Herramienta y logística',
+        'otro' => '📦 Otro',
+    ];
+
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
@@ -22,9 +34,20 @@ class NecesidadForm
 
             Select::make('item_id')
                 ->label('Insumo')
-                ->relationship('item', 'nombre', fn ($query) => $query->where('activo', true))
+                // Agrupado por categoria y con emoji: el catalogo pasa de
+                // 90 insumos y una lista plana obliga a leerla entera.
+                ->options(fn () => Item::activos()
+                    ->orderBy('categoria')
+                    ->orderBy('nombre')
+                    ->get()
+                    ->groupBy('categoria')
+                    ->mapWithKeys(fn ($items, $categoria) => [
+                        self::CATEGORIAS[$categoria] ?? '📦 Otro' => $items
+                            ->mapWithKeys(fn ($item) => [$item->id => $item->emoji.' '.$item->nombre])
+                            ->all(),
+                    ])
+                    ->all())
                 ->searchable()
-                ->preload()
                 ->required()
                 // La tabla tiene unique(centro_id, item_id). Sin esta regla,
                 // repetir un insumo sale como excepcion de MySQL.
