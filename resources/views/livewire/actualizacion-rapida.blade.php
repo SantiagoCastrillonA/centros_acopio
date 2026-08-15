@@ -48,7 +48,7 @@
                                inputmode="numeric"
                                min="0"
                                step="1"
-                               wire:model.blur="cantidades.{{ $necesidad->id }}">
+                               wire:model.live.debounce.600ms="cantidades.{{ $necesidad->id }}">
                         <span class="de">de {{ number_format($necesidad->cantidad_requerida, 0, ',', '.') }}</span>
                     </span>
                     <span class="de">faltan {{ number_format($necesidad->pendiente, 0, ',', '.') }}</span>
@@ -113,7 +113,7 @@
                                    inputmode="numeric"
                                    min="0"
                                    step="1"
-                                   wire:model.blur="cantidades.{{ $necesidad->id }}">
+                                   wire:model.live.debounce.600ms="cantidades.{{ $necesidad->id }}">
                             <span class="de">de {{ number_format($necesidad->cantidad_requerida, 0, ',', '.') }}</span>
                         </span>
                     </div>
