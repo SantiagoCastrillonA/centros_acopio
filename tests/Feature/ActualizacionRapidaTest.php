@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Widgets\NecesidadesUrgentes;
+use App\Filament\Widgets\ResumenGeneral;
 use App\Livewire\ActualizacionRapida;
 use App\Models\Centro;
 use App\Models\Item;
@@ -73,6 +75,34 @@ class ActualizacionRapidaTest extends TestCase
         $this->actingAs(User::factory()->create())
             ->get('/admin/centros')
             ->assertOk();
+    }
+
+    /**
+     * Los widgets de Filament se cargan de forma diferida, asi que no salen
+     * en el HTML inicial del escritorio: hay que probarlos como componentes.
+     */
+    public function test_el_resumen_cuenta_centros_urgencias_y_cobertura(): void
+    {
+        $this->centroConNecesidad(requerida: 100, cubierta: 20);
+
+        Livewire::actingAs(User::factory()->create())
+            ->test(ResumenGeneral::class)
+            ->assertSee('Centros abiertos')
+            ->assertSee('Insumos urgentes')
+            ->assertSee('Cobertura')
+            ->assertSee('20%')
+            ->assertSee('Sin actualizar hoy');
+    }
+
+    public function test_lo_urgente_lista_lo_pendiente_y_esconde_lo_cubierto(): void
+    {
+        $pendiente = $this->centroConNecesidad(requerida: 100, cubierta: 20);
+        $cubierta = $this->centroConNecesidad(requerida: 50, cubierta: 50);
+
+        Livewire::actingAs(User::factory()->create())
+            ->test(NecesidadesUrgentes::class)
+            ->assertCanSeeTableRecords([$pendiente])
+            ->assertCanNotSeeTableRecords([$cubierta]);
     }
 
     public function test_sumar_y_restar_guardan_de_inmediato(): void
