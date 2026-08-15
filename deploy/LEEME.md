@@ -1,18 +1,48 @@
-# Despliegue en Google Cloud (nivel gratuito)
+# Despliegue en una VM (nivel gratuito)
 
-Guía para dejar la aplicación corriendo en una VM `e2-micro` del nivel siempre gratuito
-de Google Cloud. Ubuntu 24.04 LTS, Nginx, PHP 8.3 y MySQL 8, todo en la misma máquina.
+Guía para dejar la aplicación corriendo en una máquina de 1 GB de RAM con Ubuntu 24.04
+LTS: Nginx, PHP 8.3 y MySQL 8, todo en el mismo servidor.
 
-Los planes gratuitos cambian: confirme las condiciones vigentes en la consola antes de
-crear recursos, y configure una alerta de presupuesto en **Facturación → Presupuestos y alertas**.
+El paso 1 depende del proveedor. **Del paso 2 en adelante es idéntico**, porque en ambos
+casos el sistema operativo es el mismo.
+
+Los planes gratuitos cambian seguido: confirme las condiciones vigentes en la consola de
+su proveedor antes de crear recursos, y **configure una alerta de presupuesto** antes de
+encender nada.
 
 ---
 
-## 1. Crear la máquina virtual
+## 1-A. Crear la máquina en AWS (EC2)
+
+En la consola: **EC2 → Instancias → Lanzar instancias**.
+
+| Opción | Valor |
+|---|---|
+| Región | `us-east-2` (Ohio) o `us-east-1` (Virginia) |
+| Imagen (AMI) | **Ubuntu Server 24.04 LTS**, arquitectura x86_64 |
+| Tipo de instancia | `t3.micro` — 2 vCPU, 1 GB. Debe decir *Apto para capa gratuita* |
+| Par de claves | Crear uno nuevo, formato `.pem`, y guardarlo. Sin él no hay acceso por SSH |
+| Almacenamiento | 30 GB `gp3` |
+| Grupo de seguridad | Permitir SSH (22), HTTP (80) y HTTPS (443) |
+
+Detalles que importan:
+
+- **SSH solo desde su IP.** En el grupo de seguridad, el puerto 22 con origen
+  *Mi dirección IP*, no `0.0.0.0/0`. Los puertos 80 y 443 sí van abiertos a todos.
+- **Asigne una IP elástica** en *EC2 → IP elásticas → Asignar*, y asóciela a la
+  instancia. Sin eso, la IP pública cambia cada vez que apague y encienda la máquina, y
+  el dominio y Nginx quedan apuntando a la nada. Ojo: una IP elástica **sin asociar** sí
+  se cobra.
+- La capa gratuita de AWS tiene vencimiento y su modelo cambió hace poco. Revise en
+  **Facturación → Capa gratuita** qué cubre su cuenta y hasta cuándo, y cree un
+  presupuesto de 1 USD con alerta por correo.
+
+Para conectarse, **Conectar → EC2 Instance Connect** abre una terminal en el navegador,
+sin usar el `.pem`. El usuario es `ubuntu`.
+
+## 1-B. Crear la máquina en Google Cloud (alternativa)
 
 En la consola: **Compute Engine → Instancias de VM → Crear instancia**.
-
-Las tres condiciones que definen si la VM entra en el nivel gratuito:
 
 | Opción | Valor obligatorio |
 |---|---|
@@ -21,13 +51,8 @@ Las tres condiciones que definen si la VM entra en el nivel gratuito:
 | Disco de arranque | Ubuntu 24.04 LTS, tipo **disco persistente estándar**, 30 GB |
 | Firewall | Marcar *Permitir tráfico HTTP* y *Permitir tráfico HTTPS* |
 
-De las tres regiones permitidas, `us-east1` es la de menor latencia desde Colombia.
-
-No elija disco balanceado ni SSD: no entran en el nivel gratuito. Verifique también si su
-cuenta cobra por la dirección IPv4 externa — es un cargo aparte del de la VM.
-
-Conéctese con el botón **SSH** de la consola: abre una terminal en el navegador, sin
-configurar llaves.
+No elija disco balanceado ni SSD: no entran en el nivel gratuito. El botón **SSH** de la
+consola abre una terminal en el navegador.
 
 ## 2. Subir el código a un repositorio remoto
 
