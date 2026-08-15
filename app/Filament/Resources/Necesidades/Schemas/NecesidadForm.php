@@ -4,7 +4,9 @@ namespace App\Filament\Resources\Necesidades\Schemas;
 
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 class NecesidadForm
 {
@@ -24,6 +26,15 @@ class NecesidadForm
                 ->searchable()
                 ->preload()
                 ->required()
+                // La tabla tiene unique(centro_id, item_id). Sin esta regla,
+                // repetir un insumo sale como excepcion de MySQL.
+                ->unique(
+                    ignoreRecord: true,
+                    modifyRuleUsing: fn (Unique $rule, Get $get) => $rule->where('centro_id', $get('centro_id')),
+                )
+                ->validationMessages([
+                    'unique' => 'Ese insumo ya está publicado en este centro. Edite la necesidad que ya existe.',
+                ])
                 ->helperText('Si el insumo no esta en la lista, crealo primero en Insumos.'),
 
             // Las columnas son unsignedInteger: el tope evita el mismo
