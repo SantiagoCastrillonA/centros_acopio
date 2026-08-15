@@ -2,7 +2,10 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
+use Filament\Navigation\NavigationItem;
+use Filament\Support\Icons\Heroicon;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -37,6 +40,20 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
+            ])
+            // Salida a la vista publica. Sin esto, un coordinador que entra
+            // al panel no tiene como volver a ver lo que ve el donante.
+            ->navigationItems([
+                NavigationItem::make('Ver la página pública')
+                    ->icon(Heroicon::OutlinedGlobeAlt)
+                    ->url(fn () => route('publico.index'))
+                    ->sort(99),
+            ])
+            ->userMenuItems([
+                Action::make('publico')
+                    ->label('Ver la página pública')
+                    ->icon(Heroicon::OutlinedGlobeAlt)
+                    ->url(fn () => route('publico.index')),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([

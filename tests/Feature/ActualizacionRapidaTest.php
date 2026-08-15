@@ -120,6 +120,37 @@ class ActualizacionRapidaTest extends TestCase
         $this->assertTrue($grupo?->isCollapsible());
     }
 
+    public function test_se_puede_ir_y_volver_entre_el_panel_y_la_vista_publica(): void
+    {
+        $necesidad = $this->centroConNecesidad();
+        $usuario = User::factory()->create();
+
+        // Con sesion abierta, la vista publica ofrece la vuelta al panel.
+        $this->actingAs($usuario)
+            ->get(route('publico.index'))
+            ->assertOk()
+            ->assertSee('Ir al panel')
+            ->assertSee('/admin', false);
+
+        // Y la pantalla rapida tambien.
+        $this->actingAs($usuario)
+            ->get(route('rapido', $necesidad->centro))
+            ->assertOk()
+            ->assertSee('Volver al panel');
+    }
+
+    public function test_el_donante_no_ve_nada_del_panel(): void
+    {
+        $this->centroConNecesidad();
+
+        $this->get(route('publico.index'))
+            ->assertOk()
+            ->assertDontSee('Ir al panel')
+            ->assertDontSee('Está viendo la página pública', false)
+            // Salvo la puerta de entrada para coordinadores, en el pie.
+            ->assertSee('Soy coordinador de un centro');
+    }
+
     public function test_sumar_y_restar_guardan_de_inmediato(): void
     {
         $necesidad = $this->centroConNecesidad(cubierta: 20);

@@ -197,6 +197,32 @@
         .marcador-centro--urgente { background: var(--alta); }
         .leaflet-popup-content { font-family: inherit; font-size: .95rem; }
 
+        /* Aviso de sesion: solo lo ve un coordinador con sesion abierta */
+        .barra-sesion {
+            background: var(--tinta);
+            color: #ffffff;
+            font-size: .88rem;
+            padding: 8px 0;
+        }
+        .barra-sesion .contenido {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .barra-sesion a {
+            color: #ffffff;
+            font-weight: 700;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, .5);
+            border-radius: 6px;
+            padding: 8px 12px;
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
         /* Filtros de la portada */
         .filtros {
             background: var(--fondo);
@@ -300,6 +326,16 @@
     @stack('estilos')
 </head>
 <body>
+{{-- Solo aparece con sesion abierta: el donante nunca ve nada del panel. --}}
+@auth
+    <div class="barra-sesion">
+        <div class="contenido">
+            <span>Está viendo la página pública</span>
+            <a href="{{ url('/admin') }}">⚙️ Ir al panel</a>
+        </div>
+    </div>
+@endauth
+
 @yield('cabecera')
 
 <div class="contenido">
@@ -309,6 +345,9 @@
         <p>Esta plataforma no recibe dinero. Solo publica qué insumos necesita cada centro y dónde llevarlos.</p>
         <p>Confirme el horario con el centro antes de salir. Los datos los actualiza el coordinador de cada punto.</p>
         <p><a href="{{ route('publico.privacidad') }}">🔒 Política de tratamiento de datos</a></p>
+        @guest
+            <p><a href="{{ url('/admin/login') }}">⚙️ Soy coordinador de un centro</a></p>
+        @endguest
     </footer>
 </div>
 

@@ -14,6 +14,7 @@
                 </p>
             </div>
             <a class="salir" href="{{ route('publico.centro', $centro) }}" title="Ver la página pública">👁️</a>
+            <a class="salir" href="{{ url('/admin') }}" title="Volver al panel">⚙️</a>
         </div>
     </header>
 
