@@ -158,9 +158,46 @@ credenciales ni recibe datos.
 
 ## Despliegues siguientes
 
+A mano:
+
 ```bash
 cd /var/www/centros_acopio && ./deploy/desplegar.sh
 ```
+
+## Despliegue automatico (cron)
+
+El servidor revisa `origin/master` cada 2 minutos y despliega solo si la rama avanzó. No
+abre ningún puerto ni guarda llaves en GitHub, a diferencia de GitHub Actions.
+
+Instalación, una sola vez:
+
+```bash
+sudo cp deploy/autodesplegar.sh /usr/local/bin/autodesplegar-centros-acopio.sh
+sudo chmod +x /usr/local/bin/autodesplegar-centros-acopio.sh
+sudo touch /var/log/centros_acopio-autodeploy.log
+sudo chown ubuntu:ubuntu /var/log/centros_acopio-autodeploy.log
+crontab -e
+```
+
+Y agregue la línea:
+
+```
+*/2 * * * * /usr/local/bin/autodesplegar-centros-acopio.sh >/dev/null 2>&1
+```
+
+El script vive **fuera** del repositorio a propósito: si estuviera dentro, el `git pull` del
+propio despliegue chocaría con él. La copia en `deploy/` es solo para versionarlo.
+
+Para ver qué ha desplegado:
+
+```bash
+tail -30 /var/log/centros_acopio-autodeploy.log
+```
+
+Si un despliegue falla, el registro lo dice y **la versión anterior sigue en línea**: el
+script no deja el sitio a medias.
+
+Para desactivarlo, `crontab -e` y borre la línea.
 
 ## Respaldos
 
