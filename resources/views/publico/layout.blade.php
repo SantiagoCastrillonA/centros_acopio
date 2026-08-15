@@ -189,6 +189,64 @@
         .marcador-centro--urgente { background: var(--alta); }
         .leaflet-popup-content { font-family: inherit; font-size: .95rem; }
 
+        /* Turnos de voluntariado */
+        .turno {
+            background: var(--fondo);
+            border: 1px solid var(--borde);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+        .turno--lleno { background: var(--superficie); color: var(--tinta-suave); }
+        .turno h4 { margin: 0 0 4px; font-size: 1.05rem; }
+        .cupos { font-weight: 700; }
+        .cupos--libres { color: var(--ok); }
+        .cupos--lleno { color: var(--tinta-suave); }
+
+        /* Formulario: 17 px o mas en los campos, si no iOS hace zoom al tocar */
+        label { display: block; font-weight: 600; margin: 16px 0 6px; }
+        input[type="text"], input[type="tel"] {
+            width: 100%;
+            min-height: 52px;
+            padding: 12px 14px;
+            font-size: 17px;
+            font-family: inherit;
+            color: var(--tinta);
+            background: var(--fondo);
+            border: 2px solid var(--borde);
+            border-radius: 8px;
+        }
+        input:focus-visible { outline: 3px solid var(--acento); outline-offset: 1px; }
+
+        .casilla {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            margin: 18px 0;
+            padding: 14px;
+            background: var(--acento-suave);
+            border-radius: 8px;
+            font-weight: 400;
+        }
+        .casilla input[type="checkbox"] { width: 26px; height: 26px; margin-top: 2px; flex: none; }
+
+        button.boton {
+            width: 100%;
+            border: none;
+            font-size: 1.05rem;
+            cursor: pointer;
+        }
+
+        .error { color: var(--alta); font-weight: 600; margin-top: 6px; }
+        .aviso {
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        .aviso--bien { background: var(--baja-fondo); color: var(--baja); }
+        .aviso--alto { background: var(--alta-fondo); color: var(--alta); }
+
         footer.principal {
             margin-top: 36px;
             padding-top: 16px;
@@ -208,6 +266,7 @@
     <footer class="principal">
         <p>Esta plataforma no recibe dinero. Solo publica qué insumos necesita cada centro y dónde llevarlos.</p>
         <p>Confirme el horario con el centro antes de salir. Los datos los actualiza el coordinador de cada punto.</p>
+        <p><a href="{{ route('publico.privacidad') }}">🔒 Política de tratamiento de datos</a></p>
     </footer>
 </div>
 

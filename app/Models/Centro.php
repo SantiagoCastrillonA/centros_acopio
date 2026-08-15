@@ -63,6 +63,11 @@ class Centro extends Model
         return $this->hasMany(Necesidad::class);
     }
 
+    public function turnos(): HasMany
+    {
+        return $this->hasMany(Turno::class);
+    }
+
     public function scopeActivos(Builder $query): Builder
     {
         return $query->where('activo', true);

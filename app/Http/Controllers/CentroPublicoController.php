@@ -80,8 +80,16 @@ class CentroPublicoController extends Controller
 
         $pendientes = $centro->necesidades->reject->cubierta;
 
+        // withCount y no un conteo por turno: con 20 turnos, cargar las
+        // inscripciones de cada uno son 20 consultas de mas.
+        $turnos = $centro->turnos()
+            ->disponibles()
+            ->withCount(['inscripcionesActivas as tomados'])
+            ->get();
+
         return view('publico.centro', [
             'centro' => $centro,
+            'turnos' => $turnos,
             'pendientes' => $pendientes,
             'cubiertas' => $centro->necesidades->filter->cubierta,
             'actualizado' => $centro->necesidades->max('updated_at') ?? $centro->updated_at,

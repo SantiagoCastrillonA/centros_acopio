@@ -14,6 +14,12 @@
 @endsection
 
 @section('contenido')
+    @if (session('anotado'))
+        <p class="aviso aviso--bien">
+            🙌 Quedó anotado. El coordinador del centro lo llama si algo cambia. Gracias.
+        </p>
+    @endif
+
     <article class="centro {{ $centro->tipo === 'albergue' ? 'centro--albergue' : '' }}">
         <p>
             <span class="etiqueta {{ $centro->tipo === 'albergue' ? 'etiqueta--albergue' : '' }}">
@@ -97,6 +103,36 @@
             <p>Este centro aún no ha publicado necesidades pendientes.</p>
             <p>Llame antes de llevar donaciones: así no se satura un punto que ya está cubierto.</p>
         </div>
+    @endif
+
+    @if ($turnos->isNotEmpty())
+        <h3>🙌 Turnos para voluntarios</h3>
+
+        @foreach ($turnos as $turno)
+            @php($libres = max(0, $turno->cupos - $turno->tomados))
+
+            <article class="turno {{ $libres === 0 ? 'turno--lleno' : '' }}">
+                <h4>{{ $turno->emoji }} {{ $turno->tarea }}</h4>
+                <div class="datos">
+                    <div>📅 {{ $turno->fecha->translatedFormat('l j \d\e F') }} &middot; 🕗 {{ $turno->horario }}</div>
+                </div>
+                @if ($turno->nota)
+                    <p class="apunte">{{ $turno->nota }}</p>
+                @endif
+
+                @if ($libres > 0)
+                    <p class="cupos cupos--libres">Quedan {{ $libres }} de {{ $turno->cupos }} cupos</p>
+                    <a class="boton" href="{{ route('publico.turno', $turno) }}">Anotarme en este turno</a>
+                @else
+                    <p class="cupos cupos--lleno">Turno completo</p>
+                @endif
+            </article>
+        @endforeach
+
+        <p class="apunte">
+            Para anotarse solo se pide nombre y celular, y su celular no aparece en ninguna página pública.
+            Lea la <a href="{{ route('publico.privacidad') }}">política de tratamiento de datos</a>.
+        </p>
     @endif
 
     @if ($cubiertas->isNotEmpty())
