@@ -31,12 +31,17 @@ configurar llaves.
 
 ## 2. Subir el código a un repositorio remoto
 
-El repositorio local todavía no tiene remoto. Desde su equipo:
+Ya está publicado en `https://github.com/SantiagoCastrillonA/centros_acopio`. Antes de
+desplegar, suba lo que tenga pendiente:
 
 ```bash
-git remote add origin https://github.com/USUARIO/centros_acopio.git
-git push -u origin master
+git push origin master
 ```
+
+Si el repositorio es **privado**, la VM no puede clonarlo sin credenciales. Genere un
+token de acceso personal en GitHub con permiso de solo lectura sobre el repositorio y
+úselo en la URL al clonar, o haga el repositorio público — el código no contiene
+secretos: el `.env` no está versionado.
 
 ## 3. Preparar el servidor
 
@@ -44,7 +49,7 @@ Dentro de la VM:
 
 ```bash
 sudo apt-get update && sudo apt-get install -y git
-git clone https://github.com/USUARIO/centros_acopio.git /tmp/centros_acopio
+git clone https://github.com/SantiagoCastrillonA/centros_acopio.git /tmp/centros_acopio
 sudo /tmp/centros_acopio/deploy/preparar-servidor.sh
 ```
 
