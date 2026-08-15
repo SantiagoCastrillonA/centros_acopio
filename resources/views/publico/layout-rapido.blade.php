@@ -17,8 +17,16 @@
             --superficie: #eef2f6;
             --borde: #c8d2dc;
 
-            --acento: #0b5394;
-            --acento-suave: #e6eff8;
+            /*
+             * El acento es indigo y no azul: los otros tres colores de esta
+             * pantalla ya significan algo (rojo urgente, ambar necesario,
+             * verde cubierto). El indigo no se confunde con ninguno, ni
+             * siquiera de reojo y a pleno sol.
+             */
+            --acento: #4338ca;
+            --acento-fuerte: #3730a3;
+            --acento-suave: #eef0fd;
+            --acento-tenue: #c9cdf6;
 
             --alta: #9e1409;
             --alta-fondo: #fdeceb;
@@ -54,7 +62,26 @@
             cursor: pointer;
         }
 
+        /*
+         * En el celular la lista es una columna. En tableta sobraba media
+         * pantalla a los lados, asi que la envoltura crece y las tarjetas
+         * se reparten en varias columnas: menos desplazamiento, mas insumos
+         * a la vista de un vistazo.
+         */
         .envoltura { max-width: 34rem; margin: 0 auto; padding: 0 12px; }
+
+        @media (min-width: 46rem) {
+            .envoltura { max-width: 72rem; padding: 0 20px; }
+        }
+
+        .rejilla { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 12px 0; }
+
+        @media (min-width: 46rem) {
+            .rejilla { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        }
+        @media (min-width: 72rem) {
+            .rejilla { grid-template-columns: repeat(3, 1fr); }
+        }
 
         /* Cabecera fija */
         .barra-alta {
@@ -63,11 +90,24 @@
             z-index: 10;
             background: var(--acento);
             color: #ffffff;
-            padding: calc(10px + env(safe-area-inset-top)) 0 10px;
+            padding: calc(12px + env(safe-area-inset-top)) 0 12px;
             box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
         }
         .barra-alta .envoltura { display: flex; align-items: center; gap: 10px; }
-        .barra-alta h1 { font-size: 1.05rem; margin: 0; line-height: 1.25; flex: 1; }
+        .barra-alta h1 {
+            /* Crece con la pantalla: es el unico sitio donde el coordinador
+               confirma que esta actualizando el centro correcto. */
+            font-size: clamp(1.15rem, .95rem + 1.1vw, 1.75rem);
+            font-weight: 800;
+            letter-spacing: -.015em;
+            margin: 0;
+            line-height: 1.2;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .barra-alta h1 .emoji-centro { font-size: .95em; line-height: 1; }
         .barra-alta .salir {
             color: #ffffff;
             text-decoration: none;
@@ -75,8 +115,16 @@
             padding: 8px;
             min-width: 44px;
             text-align: center;
+            border-radius: 10px;
+            transition: background-color 140ms ease-out;
         }
-        .avance-global { font-size: .8rem; color: #d6e6f6; margin: 2px 0 0; }
+        .barra-alta .salir:hover,
+        .barra-alta .salir:focus-visible { background: rgba(255, 255, 255, .16); }
+        .avance-global {
+            font-size: clamp(.8rem, .74rem + .25vw, .95rem);
+            color: var(--acento-tenue);
+            margin: 3px 0 0;
+        }
 
         /* Fila de insumo */
         /*
@@ -92,9 +140,16 @@
             border: 1px solid var(--borde);
             border-radius: 12px;
             padding: 12px 12px 12px 18px;
-            margin: 10px 0;
+            /* La separacion la pone la rejilla: si la tarjeta trae margen
+               propio, en dos columnas los huecos quedan desparejos. */
+            display: flex;
+            flex-direction: column;
             transition: opacity 140ms linear, background-color 240ms ease-out;
         }
+        /* Los controles se pegan abajo para que las tarjetas de una misma
+           fila tengan los botones a la misma altura aunque el nombre del
+           insumo ocupe dos lineas en una y una sola en la otra. */
+        .insumo .controles { margin-top: auto; padding-top: 12px; }
         .insumo::before {
             content: "";
             position: absolute;
@@ -153,6 +208,24 @@
         .emoji { font-size: 1.7rem; line-height: 1.1; }
         .nombre { font-weight: 700; font-size: 1.05rem; }
         .unidad { color: var(--tinta-suave); font-size: .85rem; }
+
+        /*
+         * El nombre lleva a la ficha del insumo en el panel: desde la bodega
+         * se corrige ahi la cantidad pedida, la prioridad o la nota, sin
+         * tener que buscar el insumo en una tabla de noventa filas.
+         *
+         * El subrayado esta siempre puesto, no al pasar el cursor: en una
+         * tableta no hay cursor que pasar.
+         */
+        a.nombre {
+            color: var(--tinta);
+            text-decoration: none;
+            border-bottom: 2px solid var(--acento-tenue);
+            transition: color 140ms ease-out, border-color 140ms ease-out;
+        }
+        a.nombre:hover,
+        a.nombre:focus-visible { color: var(--acento); border-bottom-color: var(--acento); }
+        a.nombre:focus-visible { outline: 3px solid var(--acento); outline-offset: 3px; border-radius: 3px; }
 
         .marca {
             margin-left: auto;
@@ -251,6 +324,7 @@
             transition: transform 90ms ease-out, opacity 140ms linear, background-color 140ms linear;
         }
         .controles button:active { transform: scale(.95); }
+        .controles button.mas:active { background: var(--acento-fuerte); border-color: var(--acento-fuerte); }
         .controles button[disabled] { opacity: .35; }
 
         h2 {

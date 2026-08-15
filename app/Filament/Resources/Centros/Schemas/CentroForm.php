@@ -7,6 +7,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -77,9 +78,24 @@ class CentroForm
                         // por cercania, y asi el coordinador no las teclea.
                         ->live(onBlur: true)
                         ->afterStateUpdated(function (?string $state, Set $set, Get $get) {
-                            $coordenadas = Centro::coordenadasDesdeUrl($state);
+                            if (blank($state)) {
+                                return;
+                            }
+
+                            // Resuelve tambien los enlaces cortos de
+                            // Compartir, que es lo que entrega el celular.
+                            $coordenadas = Centro::coordenadasDesdeEnlace($state);
 
                             if ($coordenadas === null) {
+                                // Sin coordenadas el centro no sale en el mapa
+                                // de la portada, y eso no se nota hasta que un
+                                // donante lo busca. Mejor decirlo aqui.
+                                Notification::make()
+                                    ->warning()
+                                    ->title('El enlace no trae la ubicación')
+                                    ->body('Escriba la latitud y la longitud a mano, o el centro no aparecerá en el mapa de la portada.')
+                                    ->send();
+
                                 return;
                             }
 
@@ -101,7 +117,7 @@ class CentroForm
                         ->maxValue(90)
                         ->step('0.0000001')
                         ->placeholder('4.5339')
-                        ->helperText('Opcional. Entre -90 y 90. Se usa en la Entrega 4.'),
+                        ->helperText('La rellena el enlace del mapa. Sin ella el centro no sale en el mapa de la portada.'),
 
                     TextInput::make('longitud')
                         ->label('Longitud')
@@ -110,7 +126,7 @@ class CentroForm
                         ->maxValue(180)
                         ->step('0.0000001')
                         ->placeholder('-75.6811')
-                        ->helperText('Opcional. Entre -180 y 180. En Colombia siempre es negativa.'),
+                        ->helperText('La rellena el enlace del mapa. En Colombia siempre es negativa.'),
                 ]),
 
             Section::make('Contacto y operacion')

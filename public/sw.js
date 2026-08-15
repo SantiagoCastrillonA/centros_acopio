@@ -16,7 +16,8 @@
  * Al cambiar CACHE se descarta todo lo guardado antes.
  */
 
-const CACHE = 'centros-acopio-v1';
+// v2: cambio el color de la marca, y con el los iconos y el manifiesto.
+const CACHE = 'centros-acopio-v2';
 
 const PRECARGA = [
     '/',

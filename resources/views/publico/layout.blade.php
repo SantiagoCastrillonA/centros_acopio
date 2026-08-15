@@ -8,7 +8,7 @@
 
     {{-- PWA: se puede instalar en el celular y abrir sin señal. --}}
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-    <meta name="theme-color" content="#0b5394">
+    <meta name="theme-color" content="#4338ca">
     <link rel="icon" href="{{ asset('iconos/icono-192.png') }}" sizes="192x192">
     <link rel="apple-touch-icon" href="{{ asset('iconos/icono-apple-180.png') }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -27,8 +27,12 @@
             --borde: #ccd5de;
             --borde-fuerte: #14181d;
 
-            --acento: #0b5394;
-            --acento-suave: #e6eff8;
+            /* Mismo indigo que la pantalla de bodega: una sola identidad, y
+               ademas no se confunde con el rojo, el ambar ni el verde, que
+               aqui si significan un nivel de urgencia. */
+            --acento: #4338ca;
+            --acento-suave: #eef0fd;
+            --acento-tenue: #c9cdf6;
 
             --alta: #9e1409;
             --alta-fondo: #fdeceb;
@@ -61,7 +65,7 @@
             margin-bottom: 22px;
         }
         .franja h1 { font-size: 1.7rem; line-height: 1.2; margin: 0 0 8px; }
-        .franja p { margin: 0; color: #dbe8f5; font-size: .98rem; }
+        .franja p { margin: 0; color: var(--acento-tenue); font-size: .98rem; }
         .franja a { color: #ffffff; }
 
         h2 { font-size: 1.3rem; line-height: 1.3; margin: 0 0 6px; }
