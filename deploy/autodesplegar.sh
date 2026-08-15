@@ -38,7 +38,10 @@ fi
 {
     echo
     echo "===== $(date -Is) : ${LOCAL:0:7} -> ${REMOTO:0:7} ====="
-    if ./deploy/desplegar.sh "$RAMA"; then
+    # Se invoca con bash a proposito, no como ./deploy/desplegar.sh: si el
+    # commit que esta por llegar es justamente el que arregla el bit de
+    # ejecucion, la version en disco todavia no lo tiene.
+    if bash ./deploy/desplegar.sh "$RAMA"; then
         echo "===== $(date -Is) : desplegado ====="
     else
         echo "===== $(date -Is) : FALLO, la version anterior sigue en linea ====="
@@ -46,4 +49,11 @@ fi
 } >> "$REGISTRO" 2>&1
 
 # El registro no debe crecer sin limite: el disco lleno tumba MySQL.
-tail -n 2000 "$REGISTRO" > "${REGISTRO}.tmp" && mv "${REGISTRO}.tmp" "$REGISTRO"
+#
+# El recorte pasa por /tmp y vuelve con cat, no con mv: el usuario que
+# despliega es dueño del archivo de registro pero no de /var/log, asi
+# que no puede crear archivos nuevos ahi.
+RECORTE=/tmp/centros_acopio-autodeploy.recorte
+tail -n 2000 "$REGISTRO" > "$RECORTE"
+cat "$RECORTE" > "$REGISTRO"
+rm -f "$RECORTE"
