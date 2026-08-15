@@ -57,15 +57,25 @@ class CentroForm
                         ->required()
                         ->maxLength(120),
 
+                    // La columna es decimal(10,7): sin estos topes, un numero
+                    // grande revienta en MySQL en vez de avisar en el campo.
                     TextInput::make('latitud')
                         ->label('Latitud')
                         ->numeric()
-                        ->helperText('Opcional. Se usa en la Entrega 4.'),
+                        ->minValue(-90)
+                        ->maxValue(90)
+                        ->step('0.0000001')
+                        ->placeholder('4.5339')
+                        ->helperText('Opcional. Entre -90 y 90. Se usa en la Entrega 4.'),
 
                     TextInput::make('longitud')
                         ->label('Longitud')
                         ->numeric()
-                        ->helperText('Opcional. Se usa en la Entrega 4.'),
+                        ->minValue(-180)
+                        ->maxValue(180)
+                        ->step('0.0000001')
+                        ->placeholder('-75.6811')
+                        ->helperText('Opcional. Entre -180 y 180. En Colombia siempre es negativa.'),
                 ]),
 
             Section::make('Contacto y operacion')

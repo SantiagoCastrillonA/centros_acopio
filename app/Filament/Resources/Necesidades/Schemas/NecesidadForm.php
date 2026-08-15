@@ -26,17 +26,23 @@ class NecesidadForm
                 ->required()
                 ->helperText('Si el insumo no esta en la lista, crealo primero en Insumos.'),
 
+            // Las columnas son unsignedInteger: el tope evita el mismo
+            // "out of range" que dan las coordenadas sin limites.
             TextInput::make('cantidad_requerida')
                 ->label('Cantidad requerida')
                 ->numeric()
+                ->integer()
                 ->minValue(0)
+                ->maxValue(4294967295)
                 ->required()
                 ->default(0),
 
             TextInput::make('cantidad_cubierta')
                 ->label('Cantidad ya recibida')
                 ->numeric()
+                ->integer()
                 ->minValue(0)
+                ->maxValue(4294967295)
                 ->required()
                 ->default(0),
 
