@@ -1,66 +1,114 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Centros de acopio
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Catálogo público de necesidades de centros de acopio y albergues, para la emergencia por el
+sismo del 10 de agosto de 2026 en Chocó, Valle del Cauca, Risaralda, Caldas y Quindío.
 
-## About Laravel
+El problema que resuelve: hoy los coordinadores llevan el inventario de necesidades en cuadernos
+y grupos de WhatsApp. Llega mercado que no se necesita, un acopio se satura mientras otro está
+vacío, y el ciudadano que quiere ayudar no sabe qué llevar ni a dónde.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**Esta plataforma no recauda dinero.** No procesa pagos ni muestra cuentas bancarias.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## En producción
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| | |
+|---|---|
+| Vista pública | http://18.216.6.154/ |
+| Panel de coordinadores | http://18.216.6.154/admin |
+| Servidor | AWS EC2 `t3.micro`, Ubuntu 24.04 LTS, región `us-east-2` |
 
-## Learning Laravel
+## Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| Capa | Elección |
+|---|---|
+| Backend | Laravel 12 |
+| Panel admin | Filament v5 |
+| Base de datos | MySQL 8 |
+| Vista pública | Blade con CSS embebido, sin build de JS |
+| Mapa | Leaflet 1.9.4 auto-hospedado, teselas de OpenStreetMap |
+| Despliegue | VPS + Nginx, sin Docker ni Redis |
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Decisiones cerradas: **no** se introduce React, Vue, Inertia ni una API REST, y no se agregan
+dependencias fuera de esta tabla sin justificarlo primero.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Reglas del proyecto
 
-## Laravel Sponsors
+1. **Cero dinero.** Si se enlaza a donación monetaria, es enlace externo a organizaciones
+   oficiales, marcado como externo.
+2. **Datos personales con cuidado.** Desde la Entrega 3 se guardan nombre y celular de
+   voluntarios: dato personal bajo la Ley 1581 de 2012. Requiere aviso de privacidad,
+   autorización explícita, y los celulares nunca se muestran en vistas públicas.
+3. **Catálogo de insumos cerrado.** El coordinador escoge de una lista, nunca escribe texto
+   libre. Si cada uno escribe "colchoneta" a su manera, los datos dejan de ser agregables.
+4. **La vista pública abre en conexión mala.** Sin build de JS, sin webfonts externas, sin CDN.
+   El mapa es mejora progresiva: si no carga, la página queda completa.
+5. **Sin login para el público.** Cualquier fricción del lado del donante mata el uso.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Modelo de datos
 
-### Premium Partners
+```
+centros      id, nombre, slug, tipo(acopio|albergue), direccion, ciudad, departamento,
+             latitud, longitud, contacto_nombre, contacto_telefono, horario, notas, activo
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+items        catalogo cerrado de insumos: id, nombre, unidad, categoria, activo
 
-## Contributing
+necesidades  id, centro_id, item_id, cantidad_requerida, cantidad_cubierta,
+             prioridad(alta|media|baja), nota      unique(centro_id, item_id)
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Desarrollo local
 
-## Code of Conduct
+Requiere PHP 8.3, Composer y MySQL 8.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+```
 
-## Security Vulnerabilities
+Cree la base y ajuste `DB_DATABASE`, `DB_USERNAME` y `DB_PASSWORD` en `.env`. Luego:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+php artisan migrate
+php artisan db:seed
+php artisan make:filament-user
+php artisan serve
+```
 
-## License
+El seeder carga el catálogo de insumos. Usa `updateOrCreate`, así que repetirlo no duplica nada.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Despliegue
+
+Guía completa en [deploy/LEEME.md](deploy/LEEME.md): creación de la máquina en AWS EC2 o Google
+Cloud, preparación del servidor y publicación con Nginx.
+
+Para desplegar cambios en un servidor ya montado:
+
+```bash
+cd /var/www/centros_acopio && ./deploy/desplegar.sh master
+```
+
+No es automático: hay que ejecutarlo después de subir cambios a `master`.
+
+## Convenciones
+
+- **Idioma:** todo en español, salvo las columnas estándar de Laravel.
+- **Sin acentos ni ñ** en identificadores de código y datos semilla. En la interfaz sí van.
+- **Modelos:** `casts()` como método, `$fillable` explícito, nunca `$guarded = []`.
+- **Textos de interfaz:** voz activa y frase concreta. "Publicar necesidad", no "Enviar".
+- **Estados vacíos:** una invitación a actuar, no un mensaje de error.
+- **Migraciones:** una tabla por archivo, con `down()` real.
+
+## Entregas
+
+| | Alcance | Estado |
+|---|---|---|
+| 1 | Catálogo público de necesidades y panel de coordinadores | Desplegada |
+| 2 | Actualización rápida en móvil (`/rapido/{centro}`, Livewire) | Pendiente |
+| 3 | Voluntarios: turnos e inscripciones | Pendiente |
+| 4 | Filtros por ciudad y orden por cercanía | Pendiente |
+| 5 | PWA con caché de lectura y exportación a Excel | Pendiente |
+
+Antes de dar por cerrada la Entrega 1 falta lo más importante: hablar con un coordinador real de
+un punto de acopio y preguntarle cómo lleva la cuenta hoy. Ninguna cantidad de código reemplaza
+esa validación.
