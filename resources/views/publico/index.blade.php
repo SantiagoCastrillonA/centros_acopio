@@ -32,7 +32,7 @@
                         {{ $centro->tipo === 'albergue' ? 'Albergue' : 'Centro de acopio' }}
                     </span>
                     @if ($centro->necesidades->isNotEmpty())
-                        <span class="etiqueta etiqueta--urgente">Urgente</span>
+                        <span class="etiqueta etiqueta--urgente">🚨 Urgente</span>
                     @endif
                 </p>
 
@@ -48,7 +48,10 @@
                         @foreach ($urgentes as $necesidad)
                             <li class="prioridad-alta">
                                 <div class="insumo-linea">
-                                    <span class="insumo-nombre">{{ $necesidad->item->nombre }}</span>
+                                    <span class="insumo-nombre">
+                                        <span aria-hidden="true">{{ $necesidad->item->emoji }}</span>
+                                        {{ $necesidad->item->nombre }}
+                                    </span>
                                     <span class="falta">
                                         faltan <strong>{{ number_format($necesidad->pendiente, 0, ',', '.') }}</strong>
                                         {{ $necesidad->item->unidad }}

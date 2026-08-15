@@ -24,6 +24,29 @@ class Item extends Model
         ];
     }
 
+    /**
+     * Emoji de la categoria. En un celular, a pleno sol y con prisa,
+     * la forma se reconoce antes que la palabra.
+     */
+    public function getEmojiAttribute(): string
+    {
+        return static::emojiDeCategoria($this->categoria);
+    }
+
+    public static function emojiDeCategoria(?string $categoria): string
+    {
+        return match ($categoria) {
+            'alimento' => '🍚',
+            'agua' => '💧',
+            'higiene' => '🧼',
+            'habitat' => '🏕️',
+            'salud' => '🩺',
+            'bebe' => '🍼',
+            'herramienta' => '🔦',
+            default => '📦',
+        };
+    }
+
     public function necesidades(): HasMany
     {
         return $this->hasMany(Necesidad::class);

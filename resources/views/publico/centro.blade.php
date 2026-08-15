@@ -56,9 +56,9 @@
         @foreach ($pendientes->groupBy('prioridad') as $prioridad => $grupo)
             <h3>
                 @switch($prioridad)
-                    @case('alta') Urgente @break
-                    @case('media') Necesario @break
-                    @default Cuando se pueda
+                    @case('alta') 🚨 Urgente @break
+                    @case('media') ⚠️ Necesario @break
+                    @default 🕗 Cuando se pueda
                 @endswitch
             </h3>
 
@@ -67,7 +67,10 @@
                     <li class="prioridad-{{ $necesidad->prioridad }}">
                         <div class="insumo-linea">
                             <span>
-                                <span class="insumo-nombre">{{ $necesidad->item->nombre }}</span>
+                                <span class="insumo-nombre">
+                                    <span aria-hidden="true">{{ $necesidad->item->emoji }}</span>
+                                    {{ $necesidad->item->nombre }}
+                                </span>
                                 @if ($necesidad->nota)
                                     <span class="insumo-nota">{{ $necesidad->nota }}</span>
                                 @endif
@@ -97,12 +100,15 @@
     @endif
 
     @if ($cubiertas->isNotEmpty())
-        <h3>Ya está cubierto</h3>
+        <h3>✅ Ya está cubierto</h3>
         <ul class="insumos">
             @foreach ($cubiertas as $necesidad)
                 <li>
                     <div class="insumo-linea">
-                        <span class="insumo-nombre">{{ $necesidad->item->nombre }}</span>
+                        <span class="insumo-nombre">
+                            <span aria-hidden="true">{{ $necesidad->item->emoji }}</span>
+                            {{ $necesidad->item->nombre }}
+                        </span>
                         <span class="falta cumplido">Completo</span>
                     </div>
                     <div class="barra barra--completa" role="presentation">

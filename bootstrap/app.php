@@ -11,7 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // Sin esto, entrar a /rapido con la sesion vencida revienta con un
+        // error 500: Laravel busca una ruta llamada "login" y aqui el acceso
+        // lo maneja el panel de Filament.
+        $middleware->redirectGuestsTo(fn () => route('filament.admin.auth.login'));
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

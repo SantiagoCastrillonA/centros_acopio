@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\Centros\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -63,6 +65,14 @@ class CentrosTable
                     ->label('Visible al publico'),
             ])
             ->recordActions([
+                // Primera accion a proposito: es la que el coordinador usa
+                // todos los dias desde el celular. Editar es lo excepcional.
+                Action::make('rapido')
+                    ->label('Actualizar')
+                    ->icon(Heroicon::OutlinedBolt)
+                    ->color('success')
+                    ->url(fn ($record) => route('rapido', $record)),
+
                 EditAction::make(),
             ])
             ->toolbarActions([
