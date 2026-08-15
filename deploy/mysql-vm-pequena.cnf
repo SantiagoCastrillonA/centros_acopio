@@ -1,0 +1,23 @@
+# /etc/mysql/mysql.conf.d/zz-vm-pequena.cnf
+#
+# La e2-micro del nivel gratuito tiene 1 GB de RAM y ahi mismo corren
+# Nginx y PHP-FPM. Con la configuracion por defecto, MySQL 8 se come casi
+# toda la memoria y el kernel termina matando procesos.
+#
+# Aplicar y reiniciar:
+#   sudo systemctl restart mysql
+
+[mysqld]
+innodb_buffer_pool_size = 128M
+innodb_log_buffer_size  = 8M
+innodb_flush_method     = O_DIRECT
+
+max_connections   = 30
+table_open_cache  = 200
+thread_cache_size = 8
+
+tmp_table_size      = 16M
+max_heap_table_size = 16M
+
+# Ocupa decenas de MB y aqui no se va a perfilar nada.
+performance_schema = OFF
