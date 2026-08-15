@@ -121,6 +121,37 @@ class ActualizacionRapidaTest extends TestCase
         $this->assertTrue($grupo?->isCollapsible());
     }
 
+    public function test_las_cantidades_se_editan_en_la_misma_tabla(): void
+    {
+        $necesidad = $this->centroConNecesidad(requerida: 100, cubierta: 20);
+
+        $componente = Livewire::actingAs(User::factory()->create())
+            ->test(ListNecesidades::class);
+
+        // Sin abrir el formulario de edicion: se escribe en la celda.
+        $componente->call('updateTableColumnState', 'cantidad_requerida', (string) $necesidad->id, 250)
+            ->call('updateTableColumnState', 'cantidad_cubierta', (string) $necesidad->id, 80)
+            ->call('updateTableColumnState', 'prioridad', (string) $necesidad->id, 'alta');
+
+        $necesidad->refresh();
+
+        $this->assertSame(250, $necesidad->cantidad_requerida);
+        $this->assertSame(80, $necesidad->cantidad_cubierta);
+        $this->assertSame('alta', $necesidad->prioridad);
+        $this->assertSame(170, $necesidad->pendiente);
+    }
+
+    public function test_una_cantidad_negativa_no_llega_a_la_base(): void
+    {
+        $necesidad = $this->centroConNecesidad(requerida: 100, cubierta: 20);
+
+        Livewire::actingAs(User::factory()->create())
+            ->test(ListNecesidades::class)
+            ->call('updateTableColumnState', 'cantidad_cubierta', (string) $necesidad->id, -30);
+
+        $this->assertSame(20, $necesidad->fresh()->cantidad_cubierta);
+    }
+
     public function test_se_puede_ir_y_volver_entre_el_panel_y_la_vista_publica(): void
     {
         $necesidad = $this->centroConNecesidad();

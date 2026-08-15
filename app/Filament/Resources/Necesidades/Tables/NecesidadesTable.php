@@ -2,10 +2,14 @@
 
 namespace App\Filament\Resources\Necesidades\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -37,27 +41,36 @@ class NecesidadesTable
 
                 TextColumn::make('item.nombre')
                     ->label('Insumo')
+                    ->formatStateUsing(fn ($state, $record) => $record->item->emoji.' '.$state)
                     ->searchable()
                     ->sortable()
                     ->description(fn ($record) => $record->item?->unidad),
 
-                TextColumn::make('prioridad')
+                // Editables en la misma tabla: con veinte insumos, abrir y
+                // guardar un formulario por cada uno son veinte pantallas.
+                SelectColumn::make('prioridad')
                     ->label('Prioridad')
-                    ->badge()
-                    ->color(fn (string $state) => match ($state) {
-                        'alta' => 'danger',
-                        'media' => 'warning',
-                        default => 'gray',
-                    })
-                    ->formatStateUsing(fn (string $state) => ucfirst($state)),
+                    ->options([
+                        'alta' => '🚨 Urgente',
+                        'media' => '⚠️ Necesario',
+                        'baja' => '🕗 Cuando se pueda',
+                    ])
+                    ->selectablePlaceholder(false)
+                    ->rules(['required', 'in:alta,media,baja']),
 
-                TextColumn::make('cantidad_requerida')
+                TextInputColumn::make('cantidad_requerida')
                     ->label('Requerido')
-                    ->alignEnd(),
+                    ->type('number')
+                    ->alignEnd()
+                    // Las columnas son unsignedInteger: sin estos topes un
+                    // numero grande o negativo revienta en MySQL.
+                    ->rules(['required', 'integer', 'min:0', 'max:4294967295']),
 
-                TextColumn::make('cantidad_cubierta')
+                TextInputColumn::make('cantidad_cubierta')
                     ->label('Recibido')
-                    ->alignEnd(),
+                    ->type('number')
+                    ->alignEnd()
+                    ->rules(['required', 'integer', 'min:0', 'max:4294967295']),
 
                 TextColumn::make('pendiente')
                     ->label('Falta')
@@ -87,7 +100,14 @@ class NecesidadesTable
                     ]),
             ])
             ->recordActions([
-                EditAction::make(),
+                Action::make('rapido')
+                    ->label('Actualizar en el celular')
+                    ->icon(Heroicon::OutlinedBolt)
+                    ->color('success')
+                    ->iconButton()
+                    ->url(fn ($record) => route('rapido', $record->centro)),
+
+                EditAction::make()->iconButton(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
