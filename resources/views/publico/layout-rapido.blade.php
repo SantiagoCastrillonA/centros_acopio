@@ -79,23 +79,74 @@
         .avance-global { font-size: .8rem; color: #d6e6f6; margin: 2px 0 0; }
 
         /* Fila de insumo */
+        /*
+         * El canto izquierdo no es un adorno de color: es el mismo avance
+         * que la barra, leido de reojo. Se llena de abajo hacia arriba con
+         * lo que ya se consiguio, y su color dice la prioridad. Asi, al
+         * bajar la lista con una mano, se ve cuanto falta sin leer cifras.
+         */
         .insumo {
+            position: relative;
+            overflow: hidden;
             background: var(--fondo);
             border: 1px solid var(--borde);
-            border-left: 6px solid var(--borde);
             border-radius: 12px;
-            padding: 12px;
+            padding: 12px 12px 12px 18px;
             margin: 10px 0;
+            transition: opacity 140ms linear, background-color 240ms ease-out;
         }
-        .insumo--alta { border-left-color: var(--alta); }
-        .insumo--media { border-left-color: var(--media); }
-        .insumo--baja { border-left-color: var(--baja); }
-        .insumo--lista { border-left-color: var(--ok); background: var(--ok-fondo); }
+        .insumo::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 6px;
+            height: 100%;
+            background: var(--borde);
+            transform: scaleY(var(--avance, 0));
+            transform-origin: left bottom;
+            transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1), background-color 240ms ease-out;
+        }
+        .insumo--alta::before { background: var(--alta); }
+        .insumo--media::before { background: var(--media); }
+        .insumo--baja::before { background: var(--baja); }
+        .insumo--lista { background: var(--ok-fondo); }
+        .insumo--lista::before { background: var(--ok); }
 
-        .insumo--tocada { animation: destello .6s ease-out; }
-        @keyframes destello {
-            from { background: var(--acento-suave); }
-            to { background: var(--fondo); }
+        /*
+         * Estados de una escritura, que es lo unico que se mueve aqui:
+         * el dato viaja al servidor y hay que contarlo, no adornarlo.
+         *
+         * 1. --guardando: mientras la peticion esta en el aire.
+         * 2. .sello: el acuse cuando aterrizo.
+         */
+        .insumo--guardando { opacity: .62; }
+        .insumo--guardando .controles button { pointer-events: none; }
+
+        .sello {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 8px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: var(--ok-fondo);
+            color: var(--ok);
+            font-size: .72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            /* Nace invisible y sin ocupar sitio: solo existe cuando hay
+               algo que acusar. Sale solo, porque es un acuse y no un aviso. */
+            opacity: 0;
+        }
+        .sello--visible {
+            animation: acuse 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes acuse {
+            0% { opacity: 0; transform: translateY(4px) scale(.9); }
+            12% { opacity: 1; transform: none; }
+            72% { opacity: 1; }
+            100% { opacity: 0; }
         }
 
         .encabezado { display: flex; align-items: flex-start; gap: 10px; }
@@ -160,7 +211,18 @@
         }
 
         .barra { height: 8px; border-radius: 999px; background: var(--superficie); overflow: hidden; }
-        .barra span { display: block; height: 100%; background: var(--acento); }
+        .barra span {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: var(--acento);
+            /* Recorre con scaleX y no con width: animar el ancho obliga al
+               navegador a recalcular la maquetacion en cada fotograma, y
+               esto corre en gama baja. */
+            transform: scaleX(var(--avance, 0));
+            transform-origin: left center;
+            transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1), background-color 240ms ease-out;
+        }
         .insumo--lista .barra span { background: var(--ok); }
 
         /* Controles: lo unico que se toca, y por eso lo mas grande */
@@ -182,7 +244,13 @@
             border-color: var(--ok);
             color: var(--ok);
         }
-        .controles button:active { transform: scale(.97); }
+        /* El acuse tactil no puede esperar al servidor: ocurre en el dedo,
+           antes de que la peticion salga. 90 ms es el limite de lo que se
+           siente instantaneo. */
+        .controles button {
+            transition: transform 90ms ease-out, opacity 140ms linear, background-color 140ms linear;
+        }
+        .controles button:active { transform: scale(.95); }
         .controles button[disabled] { opacity: .35; }
 
         h2 {
@@ -226,17 +294,71 @@
             font-size: 1.05rem;
             font-weight: 800;
         }
+        .pasos button {
+            transition: transform 90ms ease-out, background-color 160ms ease-out, border-color 160ms ease-out, color 160ms ease-out;
+        }
+        .pasos button:active { transform: scale(.96); }
         .pasos button[aria-pressed="true"] {
             background: var(--acento);
             border-color: var(--acento);
             color: #ffffff;
         }
 
-        /* Mientras viaja la peticion, el boton se ve ocupado en vez de muerto */
-        [wire\:loading] { opacity: .5; }
+        /*
+         * Superficies que no dibujamos pero igual son del diseño:
+         * seleccion, cursor de texto y barra de desplazamiento.
+         */
+        ::selection { background: var(--acento); color: #ffffff; }
+        .campo-cantidad { caret-color: var(--acento); }
+        html { scrollbar-color: var(--borde) transparent; scrollbar-width: thin; }
+
+        /*
+         * Quien pidio menos movimiento no recibe ninguno. El acuse sigue
+         * existiendo, pero aparece y desaparece sin desplazarse.
+         */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+                scroll-behavior: auto !important;
+            }
+            .sello--visible { animation: acuse-quieto 1.6s steps(1, end) forwards; }
+            @keyframes acuse-quieto {
+                0%, 80% { opacity: 1; }
+                100% { opacity: 0; }
+            }
+        }
     </style>
 </head>
 <body>
 {{ $slot }}
+
+{{--
+    El acuse de guardado vive aqui y no dentro del componente: Livewire 3
+    no ejecuta los <script> en linea de un componente.
+
+    Reinicia la animacion quitando la clase, forzando un reflujo y
+    volviendola a poner. Sin eso, al segundo toque seguido sobre la misma
+    fila no se veria nada: la animacion no se repite sobre un nodo que ya
+    existia.
+--}}
+<script>
+    document.addEventListener('livewire:init', function () {
+        Livewire.on('necesidad-guardada', function (datos) {
+            var carga = Array.isArray(datos) ? datos[0] : datos;
+            var sello = document.querySelector('[data-sello="' + carga.necesidad + '"]');
+
+            if (! sello) {
+                return;
+            }
+
+            sello.textContent = 'Guardado';
+            sello.classList.remove('sello--visible');
+            void sello.offsetWidth;
+            sello.classList.add('sello--visible');
+        });
+    });
+</script>
 </body>
 </html>

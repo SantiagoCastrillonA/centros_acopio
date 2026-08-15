@@ -315,6 +315,31 @@
         .aviso--bien { background: var(--baja-fondo); color: var(--baja); }
         .aviso--alto { background: var(--alta-fondo); color: var(--alta); }
 
+        /*
+         * Aqui el movimiento se queda en el acuse del dedo, y nada mas.
+         * El handover es explicito: esta pagina se abre a pleno sol, con
+         * mala señal y en gama baja. Una entrada animada solo retrasa lo
+         * unico que el donante vino a leer.
+         */
+        .boton, .enlace-detalle, .filtros button, .filtros select {
+            transition: transform 90ms ease-out, background-color 140ms ease-out, border-color 140ms ease-out;
+        }
+        .boton:active, .filtros button:active { transform: scale(.98); }
+
+        /* Superficies que trae el navegador y tambien son del diseño. */
+        ::selection { background: var(--acento); color: #ffffff; }
+        input, select { caret-color: var(--acento); }
+        html { scrollbar-color: var(--borde) transparent; scrollbar-width: thin; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
         footer.principal {
             margin-top: 36px;
             padding-top: 16px;

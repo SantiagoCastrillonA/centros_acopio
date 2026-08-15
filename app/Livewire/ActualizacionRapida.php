@@ -27,6 +27,15 @@ class ActualizacionRapida extends Component
     public ?int $tocada = null;
 
     /**
+     * Se incrementa en cada escritura.
+     *
+     * Livewire reusa el nodo del DOM cuando la clave no cambia, y una
+     * animacion CSS no se repite sobre un nodo que ya existia. El sello
+     * viaja en la clave del acuse para que cada guardado dibuje uno nuevo.
+     */
+    public int $sello = 0;
+
+    /**
      * Lo recibido de cada necesidad, por id.
      *
      * Existe para poder escribir la cantidad directo: cuando llega un
@@ -65,7 +74,22 @@ class ActualizacionRapida extends Component
         // Se devuelve el valor acotado al campo: si escribieron -5, el
         // coordinador tiene que ver que quedo en 0.
         $this->cantidades[$clave] = $limpio;
-        $this->tocada = (int) $clave;
+        $this->acusar((int) $clave);
+    }
+
+    /**
+     * Avisa al navegador que el dato aterrizo.
+     *
+     * Va por evento y no por una clase en el HTML porque Livewire reusa el
+     * nodo al redibujar, y una animacion CSS no vuelve a correr sobre un
+     * nodo que ya existia: al segundo toque seguido no se veria nada.
+     */
+    private function acusar(int $necesidadId): void
+    {
+        $this->tocada = $necesidadId;
+        $this->sello++;
+
+        $this->dispatch('necesidad-guardada', necesidad: $necesidadId);
     }
 
     public function cambiarPaso(int $paso): void
@@ -83,7 +107,7 @@ class ActualizacionRapida extends Component
         $necesidad->update(['cantidad_cubierta' => $nueva]);
 
         $this->cantidades[$necesidadId] = $nueva;
-        $this->tocada = $necesidadId;
+        $this->acusar($necesidadId);
     }
 
     /**
@@ -97,7 +121,7 @@ class ActualizacionRapida extends Component
         $necesidad->update(['cantidad_cubierta' => $necesidad->cantidad_requerida]);
 
         $this->cantidades[$necesidadId] = $necesidad->cantidad_requerida;
-        $this->tocada = $necesidadId;
+        $this->acusar($necesidadId);
     }
 
     private function necesidad(int $necesidadId): Necesidad

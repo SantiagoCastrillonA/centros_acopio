@@ -20,8 +20,11 @@
 
     <div class="envoltura">
         @forelse ($pendientes as $necesidad)
-            <article class="insumo insumo--{{ $necesidad->prioridad }} @if ($tocada === $necesidad->id) insumo--tocada @endif"
-                     wire:key="necesidad-{{ $necesidad->id }}">
+            <article class="insumo insumo--{{ $necesidad->prioridad }}"
+                     style="--avance: {{ $necesidad->porcentaje / 100 }}"
+                     wire:key="necesidad-{{ $necesidad->id }}"
+                     wire:loading.class="insumo--guardando"
+                     wire:target="ajustar({{ $necesidad->id }}, 1), ajustar({{ $necesidad->id }}, -1), completar({{ $necesidad->id }}), cantidades.{{ $necesidad->id }}">
                 <div class="encabezado">
                     <span class="emoji" aria-hidden="true">{{ $necesidad->item->emoji }}</span>
                     <span>
@@ -35,7 +38,10 @@
                             @default 🕗 Cuando se pueda
                         @endswitch
                     </span>
+
+                    <span class="sello" data-sello="{{ $necesidad->id }}" role="status" aria-live="polite"></span>
                 </div>
+
 
                 <div class="cuenta">
                     <span>
@@ -55,7 +61,7 @@
                 </div>
 
                 <div class="barra" role="presentation">
-                    <span style="width: {{ $necesidad->porcentaje }}%"></span>
+                    <span></span>
                 </div>
 
                 <div class="controles">
@@ -91,8 +97,11 @@
             <h2>✅ Ya está cubierto ({{ $cubiertas->count() }})</h2>
 
             @foreach ($cubiertas as $necesidad)
-                <article class="insumo insumo--lista @if ($tocada === $necesidad->id) insumo--tocada @endif"
-                         wire:key="necesidad-{{ $necesidad->id }}">
+                <article class="insumo insumo--lista"
+                         style="--avance: 1"
+                         wire:key="necesidad-{{ $necesidad->id }}"
+                         wire:loading.class="insumo--guardando"
+                         wire:target="ajustar({{ $necesidad->id }}, 1), ajustar({{ $necesidad->id }}, -1), cantidades.{{ $necesidad->id }}">
                     <div class="encabezado">
                         <span class="emoji" aria-hidden="true">{{ $necesidad->item->emoji }}</span>
                         <span>
@@ -100,6 +109,10 @@
                             <span class="unidad">{{ $necesidad->item->unidad }}</span>
                         </span>
                         <span class="marca marca--lista">Completo</span>
+
+                        @if ($tocada === $necesidad->id)
+                            <span class="sello" wire:key="sello-{{ $necesidad->id }}-{{ $sello }}" role="status">Guardado</span>
+                        @endif
                     </div>
 
                     <div class="cuenta">
