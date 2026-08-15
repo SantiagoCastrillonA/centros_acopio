@@ -189,6 +189,40 @@
         .marcador-centro--urgente { background: var(--alta); }
         .leaflet-popup-content { font-family: inherit; font-size: .95rem; }
 
+        /* Filtros de la portada */
+        .filtros {
+            background: var(--fondo);
+            border: 1px solid var(--borde);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 18px;
+        }
+        .filtros label { margin: 0 0 6px; font-size: .9rem; }
+        .filtros .campo { margin-bottom: 12px; }
+        select {
+            width: 100%;
+            min-height: 52px;
+            padding: 12px 14px;
+            font-size: 17px;
+            font-family: inherit;
+            color: var(--tinta);
+            background: var(--fondo);
+            border: 2px solid var(--borde);
+            border-radius: 8px;
+        }
+        .filtros .acciones { display: flex; gap: 10px; flex-wrap: wrap; }
+        .filtros .acciones > * { flex: 1 1 auto; min-width: 44%; text-align: center; margin-top: 0; }
+
+        .distancia {
+            display: inline-block;
+            background: var(--acento-suave);
+            color: var(--acento);
+            border-radius: 999px;
+            padding: 3px 10px;
+            font-size: .8rem;
+            font-weight: 700;
+        }
+
         /* Turnos de voluntariado */
         .turno {
             background: var(--fondo);

@@ -6,6 +6,7 @@ use App\Models\Centro;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Http\Request;
 
 class CentroPublicoController extends Controller
 {
@@ -23,10 +24,25 @@ class CentroPublicoController extends Controller
 
     /**
      * Portada: centros activos con lo que les falta de prioridad alta.
+     *
+     * Filtra por departamento y ciudad, y ordena por cercania cuando el
+     * navegador entrega coordenadas. Todo por parametros en la URL: el
+     * filtro funciona con JavaScript apagado.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $centros = Centro::query()
+        $filtros = $request->validate([
+            'departamento' => ['nullable', 'string', 'max:120'],
+            'ciudad' => ['nullable', 'string', 'max:120'],
+            'lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'lng' => ['nullable', 'numeric', 'between:-180,180'],
+        ]);
+
+        $lat = $filtros['lat'] ?? null;
+        $lng = $filtros['lng'] ?? null;
+        $cerca = $lat !== null && $lng !== null;
+
+        $consulta = Centro::query()
             ->activos()
             ->with(['necesidades' => function (HasMany $query) {
                 $query->where('prioridad', 'alta')
@@ -34,15 +50,55 @@ class CentroPublicoController extends Controller
                     ->with('item')
                     ->orderByRaw(self::FALTANTE.' DESC');
             }])
-            ->orderBy('departamento')
-            ->orderBy('ciudad')
-            ->orderBy('nombre')
-            ->get();
+            ->when($filtros['departamento'] ?? null, fn ($query, $valor) => $query->where('departamento', $valor))
+            ->when($filtros['ciudad'] ?? null, fn ($query, $valor) => $query->where('ciudad', $valor));
+
+        if ($cerca) {
+            // ST_Distance_Sphere devuelve metros. POINT recibe primero la
+            // longitud: es el eje X. Los centros sin coordenadas dan NULL y
+            // se van al final en vez de desaparecer de la lista.
+            $consulta
+                ->selectRaw('centros.*')
+                ->selectRaw(
+                    'ST_Distance_Sphere(POINT(longitud, latitud), POINT(?, ?)) AS distancia_m',
+                    [$lng, $lat]
+                )
+                ->orderByRaw('distancia_m IS NULL')
+                ->orderBy('distancia_m');
+        } else {
+            $consulta->orderBy('departamento')->orderBy('ciudad')->orderBy('nombre');
+        }
+
+        $centros = $consulta->get();
 
         return view('publico.index', [
             'centros' => $centros,
             'puntos' => $this->puntosDelMapa($centros),
+            'cerca' => $cerca,
+            'filtros' => [
+                'departamento' => $filtros['departamento'] ?? null,
+                'ciudad' => $filtros['ciudad'] ?? null,
+            ],
+            'lugares' => $this->lugaresConCentros(),
         ]);
+    }
+
+    /**
+     * Ciudades agrupadas por departamento, solo donde hay centros activos.
+     * Sirve para llenar el selector sin ofrecer opciones que no dan
+     * resultados.
+     */
+    private function lugaresConCentros(): array
+    {
+        return Centro::activos()
+            ->select('departamento', 'ciudad')
+            ->distinct()
+            ->orderBy('departamento')
+            ->orderBy('ciudad')
+            ->get()
+            ->groupBy('departamento')
+            ->map(fn ($grupo) => $grupo->pluck('ciudad')->all())
+            ->all();
     }
 
     /**
