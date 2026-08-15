@@ -39,7 +39,16 @@
 
                 <div class="cuenta">
                     <span>
-                        <strong>{{ number_format($necesidad->cantidad_cubierta, 0, ',', '.') }}</strong>
+                        <label class="oculto-visualmente" for="cantidad-{{ $necesidad->id }}">
+                            Cantidad recibida de {{ $necesidad->item->nombre }}
+                        </label>
+                        <input type="number"
+                               id="cantidad-{{ $necesidad->id }}"
+                               class="campo-cantidad"
+                               inputmode="numeric"
+                               min="0"
+                               step="1"
+                               wire:model.blur="cantidades.{{ $necesidad->id }}">
                         <span class="de">de {{ number_format($necesidad->cantidad_requerida, 0, ',', '.') }}</span>
                     </span>
                     <span class="de">faltan {{ number_format($necesidad->pendiente, 0, ',', '.') }}</span>
@@ -88,9 +97,25 @@
                         <span class="emoji" aria-hidden="true">{{ $necesidad->item->emoji }}</span>
                         <span>
                             <span class="nombre">{{ $necesidad->item->nombre }}</span><br>
-                            <span class="unidad">{{ number_format($necesidad->cantidad_cubierta, 0, ',', '.') }} {{ $necesidad->item->unidad }}</span>
+                            <span class="unidad">{{ $necesidad->item->unidad }}</span>
                         </span>
                         <span class="marca marca--lista">Completo</span>
+                    </div>
+
+                    <div class="cuenta">
+                        <span>
+                            <label class="oculto-visualmente" for="cantidad-{{ $necesidad->id }}">
+                                Cantidad recibida de {{ $necesidad->item->nombre }}
+                            </label>
+                            <input type="number"
+                                   id="cantidad-{{ $necesidad->id }}"
+                                   class="campo-cantidad"
+                                   inputmode="numeric"
+                                   min="0"
+                                   step="1"
+                                   wire:model.blur="cantidades.{{ $necesidad->id }}">
+                            <span class="de">de {{ number_format($necesidad->cantidad_requerida, 0, ',', '.') }}</span>
+                        </span>
                     </div>
 
                     <div class="controles">

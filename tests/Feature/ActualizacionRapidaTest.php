@@ -194,6 +194,31 @@ class ActualizacionRapidaTest extends TestCase
         $this->assertSame(21, $necesidad->fresh()->cantidad_cubierta);
     }
 
+    public function test_se_puede_escribir_la_cantidad_directamente(): void
+    {
+        $necesidad = $this->centroConNecesidad(requerida: 500, cubierta: 20);
+
+        Livewire::actingAs(User::factory()->create())
+            ->test(ActualizacionRapida::class, ['centro' => $necesidad->centro])
+            ->set('cantidades.'.$necesidad->id, 420);
+
+        $this->assertSame(420, $necesidad->fresh()->cantidad_cubierta);
+    }
+
+    public function test_lo_escrito_se_acota_antes_de_llegar_a_la_base(): void
+    {
+        $necesidad = $this->centroConNecesidad(requerida: 100, cubierta: 20);
+
+        // cantidad_cubierta es unsigned: un negativo reventaria en MySQL.
+        $componente = Livewire::actingAs(User::factory()->create())
+            ->test(ActualizacionRapida::class, ['centro' => $necesidad->centro])
+            ->set('cantidades.'.$necesidad->id, -50);
+
+        $this->assertSame(0, $necesidad->fresh()->cantidad_cubierta);
+        // Y el campo muestra el valor acotado, no lo que se escribio.
+        $componente->assertSet('cantidades.'.$necesidad->id, 0);
+    }
+
     public function test_restar_nunca_deja_la_cantidad_en_negativo(): void
     {
         $necesidad = $this->centroConNecesidad(cubierta: 3);

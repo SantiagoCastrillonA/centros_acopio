@@ -129,6 +129,36 @@
         .cuenta strong { font-size: 1.9rem; letter-spacing: -.02em; }
         .cuenta .de { color: var(--tinta-suave); font-size: .9rem; }
 
+        /* Campo para escribir la cantidad: cuando llega un camion con 400
+           unidades, contarlas a toques no tiene sentido. */
+        .campo-cantidad {
+            width: 5.5ch;
+            min-height: 56px;
+            padding: 6px 8px;
+            font-family: inherit;
+            font-size: 1.7rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            text-align: center;
+            color: var(--tinta);
+            background: var(--fondo);
+            border: 2px solid var(--borde);
+            border-radius: 10px;
+            -moz-appearance: textfield;
+        }
+        .campo-cantidad::-webkit-outer-spin-button,
+        .campo-cantidad::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .campo-cantidad:focus-visible { outline: 3px solid var(--acento); outline-offset: 1px; border-color: var(--acento); }
+
+        .oculto-visualmente {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
+        }
+
         .barra { height: 8px; border-radius: 999px; background: var(--superficie); overflow: hidden; }
         .barra span { display: block; height: 100%; background: var(--acento); }
         .insumo--lista .barra span { background: var(--ok); }

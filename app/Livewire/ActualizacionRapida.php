@@ -26,9 +26,46 @@ class ActualizacionRapida extends Component
     /** Ultima necesidad tocada, para la confirmacion visual. */
     public ?int $tocada = null;
 
+    /**
+     * Lo recibido de cada necesidad, por id.
+     *
+     * Existe para poder escribir la cantidad directo: cuando llega un
+     * camion con 400 unidades, contarlas a toques no tiene sentido.
+     */
+    public array $cantidades = [];
+
     public function mount(Centro $centro): void
     {
         $this->centro = $centro;
+        $this->sincronizarCantidades();
+    }
+
+    private function sincronizarCantidades(): void
+    {
+        $this->cantidades = $this->centro->necesidades()
+            ->pluck('cantidad_cubierta', 'id')
+            ->map(fn ($cantidad) => (int) $cantidad)
+            ->all();
+    }
+
+    /**
+     * Se dispara al salir del campo, sin boton "guardar", igual que los
+     * botones de mas y menos.
+     */
+    public function updatedCantidades(mixed $valor, string $clave): void
+    {
+        $necesidad = $this->necesidad((int) $clave);
+
+        // La columna es unsigned: cualquier cosa que escriban se acota antes
+        // de llegar a la base, en vez de reventar con un error de MySQL.
+        $limpio = max(0, min(4294967295, (int) $valor));
+
+        $necesidad->update(['cantidad_cubierta' => $limpio]);
+
+        // Se devuelve el valor acotado al campo: si escribieron -5, el
+        // coordinador tiene que ver que quedo en 0.
+        $this->cantidades[$clave] = $limpio;
+        $this->tocada = (int) $clave;
     }
 
     public function cambiarPaso(int $paso): void
@@ -41,10 +78,11 @@ class ActualizacionRapida extends Component
         $necesidad = $this->necesidad($necesidadId);
 
         // Nunca por debajo de cero: cantidad_cubierta es unsigned en la base.
-        $necesidad->update([
-            'cantidad_cubierta' => max(0, $necesidad->cantidad_cubierta + ($signo * $this->paso)),
-        ]);
+        $nueva = max(0, $necesidad->cantidad_cubierta + ($signo * $this->paso));
 
+        $necesidad->update(['cantidad_cubierta' => $nueva]);
+
+        $this->cantidades[$necesidadId] = $nueva;
         $this->tocada = $necesidadId;
     }
 
@@ -58,6 +96,7 @@ class ActualizacionRapida extends Component
 
         $necesidad->update(['cantidad_cubierta' => $necesidad->cantidad_requerida]);
 
+        $this->cantidades[$necesidadId] = $necesidad->cantidad_requerida;
         $this->tocada = $necesidadId;
     }
 
@@ -76,6 +115,12 @@ class ActualizacionRapida extends Component
             ->orderByRaw("FIELD(prioridad, 'alta', 'media', 'baja')")
             ->orderByRaw('GREATEST(CAST(cantidad_requerida AS SIGNED) - CAST(cantidad_cubierta AS SIGNED), 0) DESC')
             ->get();
+
+        // Una necesidad publicada desde el panel mientras esta pantalla
+        // estaba abierta no tendria entrada en el arreglo.
+        foreach ($necesidades as $necesidad) {
+            $this->cantidades[$necesidad->id] ??= $necesidad->cantidad_cubierta;
+        }
 
         return view('livewire.actualizacion-rapida', [
             'pendientes' => $necesidades->reject->cubierta,
