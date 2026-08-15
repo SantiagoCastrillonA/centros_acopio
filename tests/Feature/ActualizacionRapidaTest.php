@@ -61,6 +61,20 @@ class ActualizacionRapidaTest extends TestCase
             ->assertSee('🏕️', false);
     }
 
+    /**
+     * Filament devuelve 403 fuera de "local" si User no implementa
+     * FilamentUser. El entorno de pruebas es "testing", asi que esta prueba
+     * reproduce la condicion que se dio en produccion.
+     */
+    public function test_el_coordinador_entra_al_panel_fuera_de_local(): void
+    {
+        $this->assertNotSame('local', config('app.env'));
+
+        $this->actingAs(User::factory()->create())
+            ->get('/admin/centros')
+            ->assertOk();
+    }
+
     public function test_sumar_y_restar_guardan_de_inmediato(): void
     {
         $necesidad = $this->centroConNecesidad(cubierta: 20);

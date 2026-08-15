@@ -3,11 +3,13 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -44,5 +46,20 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Sin esto, Filament devuelve 403 en cualquier entorno que no sea local:
+     * es su proteccion para que un modelo User sin reglas no quede abierto
+     * en produccion.
+     *
+     * Aqui no hay roles ni jerarquia de permisos, y las cuentas se crean a
+     * mano con make:filament-user, asi que tener cuenta es la autorizacion.
+     * Cuando existan varios coordinadores por centro, esta es la funcion
+     * que hay que cambiar.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;
     }
 }
