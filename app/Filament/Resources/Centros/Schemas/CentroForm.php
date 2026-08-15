@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources\Centros\Schemas;
 
+use App\Models\Centro;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
 class CentroForm
@@ -56,6 +59,38 @@ class CentroForm
                         ->label('Departamento')
                         ->required()
                         ->maxLength(120),
+
+                    TextInput::make('mapa_url')
+                        ->label('Enlace del mapa')
+                        ->url()
+                        ->maxLength(500)
+                        ->columnSpanFull()
+                        ->placeholder('https://maps.app.goo.gl/...')
+                        ->helperText('En Google Maps: busque el sitio, toque Compartir y pegue aquí el enlace. Es el botón "Cómo llegar" que ve el donante.')
+                        ->rule(fn () => function (string $atributo, $valor, callable $fallar) {
+                            if (! Centro::esUrlDeMapaValida($valor)) {
+                                $fallar('Pegue un enlace de Google Maps, OpenStreetMap o Waze.');
+                            }
+                        })
+                        // Al pegar el enlace se intenta sacar latitud y
+                        // longitud: son las que alimentan el mapa y el orden
+                        // por cercania, y asi el coordinador no las teclea.
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(function (?string $state, Set $set, Get $get) {
+                            $coordenadas = Centro::coordenadasDesdeUrl($state);
+
+                            if ($coordenadas === null) {
+                                return;
+                            }
+
+                            if (blank($get('latitud'))) {
+                                $set('latitud', $coordenadas['latitud']);
+                            }
+
+                            if (blank($get('longitud'))) {
+                                $set('longitud', $coordenadas['longitud']);
+                            }
+                        }),
 
                     // La columna es decimal(10,7): sin estos topes, un numero
                     // grande revienta en MySQL en vez de avisar en el campo.

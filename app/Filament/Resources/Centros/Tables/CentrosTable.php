@@ -44,6 +44,16 @@ class CentrosTable
                     ->counts('necesidades')
                     ->alignCenter(),
 
+                IconColumn::make('mapa_url')
+                    ->label('Mapa')
+                    ->boolean()
+                    ->state(fn ($record) => filled($record->como_llegar_url))
+                    ->trueIcon(Heroicon::OutlinedMapPin)
+                    ->falseIcon(Heroicon::OutlinedNoSymbol)
+                    ->tooltip(fn ($record) => filled($record->como_llegar_url)
+                        ? 'El donante puede tocar "Cómo llegar"'
+                        : 'Sin enlace de mapa ni coordenadas'),
+
                 IconColumn::make('activo')
                     ->label('Publico')
                     ->boolean(),

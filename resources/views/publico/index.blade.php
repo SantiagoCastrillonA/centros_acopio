@@ -128,6 +128,13 @@
                 @endif
 
                 <a class="boton" href="{{ route('publico.centro', $centro) }}">Ver todo lo que necesita</a>
+
+                @if ($centro->como_llegar_url)
+                    <a class="boton boton--secundario"
+                       href="{{ $centro->como_llegar_url }}"
+                       target="_blank"
+                       rel="noopener noreferrer">🧭 Cómo llegar</a>
+                @endif
             </article>
         @endforeach
     @empty

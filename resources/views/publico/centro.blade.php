@@ -48,11 +48,11 @@
             <p>{{ $centro->notas }}</p>
         @endif
 
-        @if (filled($centro->latitud) && filled($centro->longitud))
+        @if ($centro->como_llegar_url)
             <a class="boton boton--secundario"
-               href="https://www.openstreetmap.org/?mlat={{ $centro->latitud }}&mlon={{ $centro->longitud }}#map=17/{{ $centro->latitud }}/{{ $centro->longitud }}"
+               href="{{ $centro->como_llegar_url }}"
                target="_blank"
-               rel="noopener noreferrer">Cómo llegar (abre OpenStreetMap)</a>
+               rel="noopener noreferrer">🧭 Cómo llegar</a>
         @endif
     </article>
 
