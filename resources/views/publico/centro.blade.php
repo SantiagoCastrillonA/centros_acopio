@@ -3,15 +3,26 @@
 @section('titulo', $centro->nombre.' — qué necesita hoy')
 @section('descripcion', 'Insumos que necesita '.$centro->nombre.' en '.$centro->ciudad.'. Dirección, horario y contacto.')
 
+@section('cabecera')
+    <div class="franja">
+        <div class="contenido">
+            <a class="volver" href="{{ route('publico.index') }}">&larr; Todos los centros</a>
+            <h1>{{ $centro->nombre }}</h1>
+            <p>{{ $centro->ciudad }}, {{ $centro->departamento }}</p>
+        </div>
+    </div>
+@endsection
+
 @section('contenido')
-    <header class="principal">
-        <a class="volver" href="{{ route('publico.index') }}">&larr; Todos los centros</a>
-        <h1>{{ $centro->nombre }}</h1>
-        <p><span class="etiqueta">{{ $centro->tipo === 'albergue' ? 'Albergue' : 'Centro de acopio' }}</span></p>
+    <article class="centro {{ $centro->tipo === 'albergue' ? 'centro--albergue' : '' }}">
+        <p>
+            <span class="etiqueta {{ $centro->tipo === 'albergue' ? 'etiqueta--albergue' : '' }}">
+                {{ $centro->tipo === 'albergue' ? 'Albergue' : 'Centro de acopio' }}
+            </span>
+        </p>
 
         <div class="datos">
             <div>{{ $centro->direccion }}</div>
-            <div>{{ $centro->ciudad }}, {{ $centro->departamento }}</div>
             @if ($centro->horario)
                 <div>Horario: {{ $centro->horario }}</div>
             @endif
@@ -30,7 +41,16 @@
         @if ($centro->notas)
             <p>{{ $centro->notas }}</p>
         @endif
-    </header>
+
+        @if (filled($centro->latitud) && filled($centro->longitud))
+            <a class="boton boton--secundario"
+               href="https://www.openstreetmap.org/?mlat={{ $centro->latitud }}&mlon={{ $centro->longitud }}#map=17/{{ $centro->latitud }}/{{ $centro->longitud }}"
+               target="_blank"
+               rel="noopener noreferrer">Cómo llegar (abre OpenStreetMap)</a>
+        @endif
+    </article>
+
+    @include('publico.mapa', ['id' => 'mapa-centro', 'titulo' => 'Dónde queda', 'puntos' => $puntos])
 
     @if ($pendientes->isNotEmpty())
         @foreach ($pendientes->groupBy('prioridad') as $prioridad => $grupo)
@@ -45,16 +65,26 @@
             <ul class="insumos">
                 @foreach ($grupo as $necesidad)
                     <li class="prioridad-{{ $necesidad->prioridad }}">
-                        <span>
-                            <span class="insumo-nombre">{{ $necesidad->item->nombre }}</span>
-                            @if ($necesidad->nota)
-                                <span class="insumo-nota">{{ $necesidad->nota }}</span>
-                            @endif
-                        </span>
-                        <span class="falta">
-                            faltan <strong>{{ number_format($necesidad->pendiente, 0, ',', '.') }}</strong>
-                            {{ $necesidad->item->unidad }}
-                        </span>
+                        <div class="insumo-linea">
+                            <span>
+                                <span class="insumo-nombre">{{ $necesidad->item->nombre }}</span>
+                                @if ($necesidad->nota)
+                                    <span class="insumo-nota">{{ $necesidad->nota }}</span>
+                                @endif
+                            </span>
+                            <span class="falta">
+                                faltan <strong>{{ number_format($necesidad->pendiente, 0, ',', '.') }}</strong>
+                                {{ $necesidad->item->unidad }}
+                            </span>
+                        </div>
+                        <div class="barra" role="presentation">
+                            <span style="width: {{ $necesidad->porcentaje }}%"></span>
+                        </div>
+                        <p class="apunte" style="margin: 6px 0 0">
+                            Lleva {{ $necesidad->porcentaje }}% de lo que necesita
+                            ({{ number_format($necesidad->cantidad_cubierta, 0, ',', '.') }}
+                            de {{ number_format($necesidad->cantidad_requerida, 0, ',', '.') }}).
+                        </p>
                     </li>
                 @endforeach
             </ul>
@@ -71,8 +101,13 @@
         <ul class="insumos">
             @foreach ($cubiertas as $necesidad)
                 <li>
-                    <span class="insumo-nombre">{{ $necesidad->item->nombre }}</span>
-                    <span class="falta cumplido">Completo</span>
+                    <div class="insumo-linea">
+                        <span class="insumo-nombre">{{ $necesidad->item->nombre }}</span>
+                        <span class="falta cumplido">Completo</span>
+                    </div>
+                    <div class="barra barra--completa" role="presentation">
+                        <span style="width: 100%"></span>
+                    </div>
                 </li>
             @endforeach
         </ul>

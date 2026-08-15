@@ -3,14 +3,20 @@
 @section('titulo', 'Qué se necesita y dónde llevarlo')
 @section('descripcion', 'Centros de acopio y albergues activos, con los insumos que más les faltan hoy.')
 
+@section('cabecera')
+    <div class="franja">
+        <div class="contenido">
+            <h1>Qué se necesita y dónde llevarlo</h1>
+            <p>
+                Cada centro publica los insumos que le faltan. Lleve solo lo que aparece en la lista:
+                lo que no se necesita ocupa espacio y trabajo que hacen falta en otra parte.
+            </p>
+        </div>
+    </div>
+@endsection
+
 @section('contenido')
-    <header class="principal">
-        <h1>Qué se necesita y dónde llevarlo</h1>
-        <p class="apunte">
-            Cada centro publica los insumos que le faltan. Lleve solo lo que aparece en la lista:
-            lo que no se necesita ocupa espacio y trabajo que hacen falta en otra parte.
-        </p>
-    </header>
+    @include('publico.mapa', ['id' => 'mapa-centros', 'titulo' => 'Dónde están los centros', 'puntos' => $puntos])
 
     @forelse ($centros->groupBy('ciudad') as $ciudad => $grupo)
         <h3>{{ $ciudad }} &middot; {{ $grupo->first()->departamento }}</h3>
@@ -18,9 +24,17 @@
         @foreach ($grupo as $centro)
             @php($urgentes = $centro->necesidades->take(6))
 
-            <article class="centro">
+            <article class="centro {{ $centro->tipo === 'albergue' ? 'centro--albergue' : '' }}">
                 <h2>{{ $centro->nombre }}</h2>
-                <p><span class="etiqueta">{{ $centro->tipo === 'albergue' ? 'Albergue' : 'Centro de acopio' }}</span></p>
+
+                <p>
+                    <span class="etiqueta {{ $centro->tipo === 'albergue' ? 'etiqueta--albergue' : '' }}">
+                        {{ $centro->tipo === 'albergue' ? 'Albergue' : 'Centro de acopio' }}
+                    </span>
+                    @if ($centro->necesidades->isNotEmpty())
+                        <span class="etiqueta etiqueta--urgente">Urgente</span>
+                    @endif
+                </p>
 
                 <div class="datos">
                     <div>{{ $centro->direccion }}</div>
@@ -33,11 +47,16 @@
                     <ul class="insumos">
                         @foreach ($urgentes as $necesidad)
                             <li class="prioridad-alta">
-                                <span class="insumo-nombre">{{ $necesidad->item->nombre }}</span>
-                                <span class="falta">
-                                    faltan <strong>{{ number_format($necesidad->pendiente, 0, ',', '.') }}</strong>
-                                    {{ $necesidad->item->unidad }}
-                                </span>
+                                <div class="insumo-linea">
+                                    <span class="insumo-nombre">{{ $necesidad->item->nombre }}</span>
+                                    <span class="falta">
+                                        faltan <strong>{{ number_format($necesidad->pendiente, 0, ',', '.') }}</strong>
+                                        {{ $necesidad->item->unidad }}
+                                    </span>
+                                </div>
+                                <div class="barra" role="presentation">
+                                    <span style="width: {{ $necesidad->porcentaje }}%"></span>
+                                </div>
                             </li>
                         @endforeach
                     </ul>
@@ -51,9 +70,7 @@
                     <p class="apunte">Sin urgencias publicadas hoy. Vea la lista completa antes de llevar algo.</p>
                 @endif
 
-                <a class="enlace-detalle" href="{{ route('publico.centro', $centro) }}">
-                    Ver todo lo que necesita
-                </a>
+                <a class="boton" href="{{ route('publico.centro', $centro) }}">Ver todo lo que necesita</a>
             </article>
         @endforeach
     @empty

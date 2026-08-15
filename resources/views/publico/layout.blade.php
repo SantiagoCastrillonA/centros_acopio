@@ -6,126 +6,202 @@
     <title>@yield('titulo', 'Centros de acopio y albergues')</title>
     <meta name="description" content="@yield('descripcion', 'Qué se necesita y dónde llevarlo. Centros de acopio y albergues activos.')">
     <style>
-        /* Sin fuentes externas, sin CDN, sin JS: la pagina tiene que abrir en 2G. */
+        /*
+         * Sin fuentes externas y sin CSS de terceros: la pagina tiene que
+         * abrir en 2G. El color es funcional, no decorativo: cada tono
+         * significa un nivel de urgencia.
+         */
         :root {
-            --tinta: #111111;
-            --tinta-suave: #444444;
+            --tinta: #14181d;
+            --tinta-suave: #4a5560;
             --fondo: #ffffff;
-            --linea: #cccccc;
-            --alta: #b00020;
-            --media: #8a5300;
-            --baja: #33691e;
-            --ok: #1b5e20;
+            --superficie: #f2f5f8;
+            --borde: #ccd5de;
+            --borde-fuerte: #14181d;
+
+            --acento: #0b5394;
+            --acento-suave: #e6eff8;
+
+            --alta: #9e1409;
+            --alta-fondo: #fdeceb;
+            --media: #7a4b00;
+            --media-fondo: #fdf2e0;
+            --baja: #14572a;
+            --baja-fondo: #e8f4ec;
+            --ok: #14572a;
         }
 
         * { box-sizing: border-box; }
 
         body {
             margin: 0;
-            padding: 0 16px 48px;
-            background: var(--fondo);
+            padding: 0 0 48px;
+            background: var(--superficie);
             color: var(--tinta);
             font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
             font-size: 18px;
             line-height: 1.5;
         }
 
-        .contenido { max-width: 44rem; margin: 0 auto; }
+        .contenido { max-width: 46rem; margin: 0 auto; padding: 0 16px; }
 
-        header.principal {
-            border-bottom: 3px solid var(--tinta);
-            padding: 20px 0 16px;
-            margin-bottom: 24px;
+        /* Cabecera */
+        .franja {
+            background: var(--acento);
+            color: #ffffff;
+            padding: 22px 0 20px;
+            margin-bottom: 22px;
+        }
+        .franja h1 { font-size: 1.7rem; line-height: 1.2; margin: 0 0 8px; }
+        .franja p { margin: 0; color: #dbe8f5; font-size: .98rem; }
+        .franja a { color: #ffffff; }
+
+        h2 { font-size: 1.3rem; line-height: 1.3; margin: 0 0 6px; }
+        h3 {
+            font-size: .82rem;
+            margin: 26px 0 10px;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            color: var(--tinta-suave);
         }
 
-        h1 { font-size: 1.6rem; line-height: 1.25; margin: 0 0 8px; }
-        h2 { font-size: 1.25rem; line-height: 1.3; margin: 0 0 4px; }
-        h3 { font-size: 1rem; margin: 24px 0 8px; text-transform: uppercase; letter-spacing: .04em; color: var(--tinta-suave); }
-
         p { margin: 0 0 12px; }
-        .apunte { color: var(--tinta-suave); font-size: .95rem; }
+        .apunte { color: var(--tinta-suave); font-size: .93rem; }
 
-        a { color: #0b4fa8; }
-        a:focus-visible, button:focus-visible { outline: 3px solid #0b4fa8; outline-offset: 2px; }
+        a { color: var(--acento); }
+        a:focus-visible, button:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
 
         .volver {
             display: inline-block;
             padding: 12px 0;
             min-height: 48px;
             font-weight: 600;
+            text-decoration: none;
         }
 
+        /* Tarjeta de centro */
         .centro {
-            border: 2px solid var(--linea);
-            border-radius: 6px;
+            background: var(--fondo);
+            border: 1px solid var(--borde);
+            border-left: 6px solid var(--acento);
+            border-radius: 8px;
             padding: 16px;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
+        .centro--albergue { border-left-color: var(--baja); }
 
         .etiqueta {
             display: inline-block;
-            border: 1px solid var(--tinta-suave);
-            border-radius: 3px;
-            padding: 1px 7px;
-            font-size: .8rem;
+            border-radius: 999px;
+            padding: 3px 11px;
+            font-size: .76rem;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: .04em;
-            color: var(--tinta-suave);
-            vertical-align: middle;
+            letter-spacing: .05em;
+            background: var(--acento-suave);
+            color: var(--acento);
         }
+        .etiqueta--albergue { background: var(--baja-fondo); color: var(--baja); }
+        .etiqueta--urgente { background: var(--alta-fondo); color: var(--alta); }
 
-        .datos { margin: 8px 0 12px; font-size: .95rem; color: var(--tinta-suave); }
-        .datos div { margin-bottom: 2px; }
+        .datos { margin: 10px 0 14px; font-size: .93rem; color: var(--tinta-suave); }
+        .datos div { margin-bottom: 3px; }
 
+        /* Lista de insumos */
         ul.insumos { list-style: none; margin: 0; padding: 0; }
 
         ul.insumos li {
+            padding: 12px 0;
+            border-top: 1px solid var(--borde);
+        }
+
+        .insumo-linea {
             display: flex;
             justify-content: space-between;
             gap: 12px;
             align-items: baseline;
-            padding: 10px 0;
-            border-top: 1px solid var(--linea);
         }
-
         .insumo-nombre { font-weight: 600; }
-        .insumo-nota { display: block; font-weight: 400; font-size: .9rem; color: var(--tinta-suave); }
+        .insumo-nota { display: block; font-weight: 400; font-size: .88rem; color: var(--tinta-suave); }
         .falta { white-space: nowrap; font-variant-numeric: tabular-nums; text-align: right; }
-        .falta strong { font-size: 1.15rem; }
+        .falta strong { font-size: 1.2rem; }
 
-        .prioridad-alta strong { color: var(--alta); }
-        .prioridad-media strong { color: var(--media); }
-        .prioridad-baja strong { color: var(--baja); }
-        .cumplido { color: var(--ok); font-weight: 600; }
+        .prioridad-alta .falta strong { color: var(--alta); }
+        .prioridad-media .falta strong { color: var(--media); }
+        .prioridad-baja .falta strong { color: var(--baja); }
+        .cumplido { color: var(--ok); font-weight: 700; }
 
-        .enlace-detalle {
+        /* Barra de avance: cuanto se lleva conseguido */
+        .barra {
+            margin-top: 8px;
+            height: 10px;
+            border-radius: 999px;
+            background: var(--borde);
+            overflow: hidden;
+        }
+        .barra span { display: block; height: 100%; background: var(--acento); }
+        .prioridad-alta .barra span { background: var(--alta); }
+        .prioridad-media .barra span { background: var(--media); }
+        .prioridad-baja .barra span { background: var(--baja); }
+        .barra--completa span { background: var(--ok); }
+
+        /* Botones */
+        .boton {
             display: inline-block;
             margin-top: 14px;
-            padding: 12px 16px;
+            padding: 13px 18px;
             min-height: 48px;
-            border: 2px solid #0b4fa8;
-            border-radius: 6px;
-            font-weight: 600;
+            background: var(--acento);
+            color: #ffffff;
+            border-radius: 8px;
+            font-weight: 700;
             text-decoration: none;
+        }
+        .boton--secundario {
+            background: var(--fondo);
+            color: var(--acento);
+            border: 2px solid var(--acento);
         }
 
         .vacio {
-            border: 2px dashed var(--linea);
-            border-radius: 6px;
-            padding: 16px;
+            background: var(--fondo);
+            border: 2px dashed var(--borde);
+            border-radius: 8px;
+            padding: 18px;
             color: var(--tinta-suave);
         }
 
+        /* Mapa: solo aparece si el navegador logra cargarlo */
+        .mapa {
+            height: 320px;
+            border: 1px solid var(--borde);
+            border-radius: 8px;
+            background: var(--fondo);
+        }
+        .marcador-centro {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 3px solid #ffffff;
+            background: var(--acento);
+            box-shadow: 0 0 0 1px var(--tinta);
+        }
+        .marcador-centro--urgente { background: var(--alta); }
+        .leaflet-popup-content { font-family: inherit; font-size: .95rem; }
+
         footer.principal {
-            margin-top: 40px;
+            margin-top: 36px;
             padding-top: 16px;
-            border-top: 1px solid var(--linea);
+            border-top: 1px solid var(--borde);
             font-size: .9rem;
             color: var(--tinta-suave);
         }
     </style>
+    @stack('estilos')
 </head>
 <body>
+@yield('cabecera')
+
 <div class="contenido">
     @yield('contenido')
 
@@ -134,5 +210,7 @@
         <p>Confirme el horario con el centro antes de salir. Los datos los actualiza el coordinador de cada punto.</p>
     </footer>
 </div>
+
+@stack('scripts')
 </body>
 </html>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Centro;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CentroPublicoController extends Controller
@@ -40,7 +41,28 @@ class CentroPublicoController extends Controller
 
         return view('publico.index', [
             'centros' => $centros,
+            'puntos' => $this->puntosDelMapa($centros),
         ]);
+    }
+
+    /**
+     * Marcadores del mapa. Solo entran los centros con coordenadas
+     * cargadas: el resto sigue apareciendo en la lista.
+     */
+    private function puntosDelMapa(Collection $centros): array
+    {
+        return $centros
+            ->filter(fn (Centro $centro) => filled($centro->latitud) && filled($centro->longitud))
+            ->map(fn (Centro $centro) => [
+                'nombre' => $centro->nombre,
+                'detalle' => $centro->direccion.', '.$centro->ciudad,
+                'lat' => (float) $centro->latitud,
+                'lng' => (float) $centro->longitud,
+                'url' => route('publico.centro', $centro),
+                'urgente' => $centro->necesidades->isNotEmpty(),
+            ])
+            ->values()
+            ->all();
     }
 
     /**
@@ -56,11 +78,23 @@ class CentroPublicoController extends Controller
                 ->orderByRaw(self::FALTANTE.' DESC');
         }]);
 
+        $pendientes = $centro->necesidades->reject->cubierta;
+
         return view('publico.centro', [
             'centro' => $centro,
-            'pendientes' => $centro->necesidades->reject->cubierta,
+            'pendientes' => $pendientes,
             'cubiertas' => $centro->necesidades->filter->cubierta,
             'actualizado' => $centro->necesidades->max('updated_at') ?? $centro->updated_at,
+            'puntos' => filled($centro->latitud) && filled($centro->longitud)
+                ? [[
+                    'nombre' => $centro->nombre,
+                    'detalle' => $centro->direccion.', '.$centro->ciudad,
+                    'lat' => (float) $centro->latitud,
+                    'lng' => (float) $centro->longitud,
+                    'url' => route('publico.centro', $centro),
+                    'urgente' => $pendientes->where('prioridad', 'alta')->isNotEmpty(),
+                ]]
+                : [],
         ]);
     }
 }
