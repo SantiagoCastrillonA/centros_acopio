@@ -38,7 +38,9 @@ php artisan route:cache
 php artisan view:cache
 
 echo "==> Ajustando permisos de escritura"
-sudo chown -R "$USER":www-data storage bootstrap/cache
+# id -un y no $USER: cron no define esa variable, y con set -u el
+# despliegue muere justo antes de recargar PHP-FPM.
+sudo chown -R "$(id -un)":www-data storage bootstrap/cache
 sudo chmod -R ug+rw storage bootstrap/cache
 
 echo "==> Recargando PHP-FPM"

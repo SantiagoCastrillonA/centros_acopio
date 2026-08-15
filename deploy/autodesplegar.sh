@@ -44,7 +44,10 @@ fi
     if bash ./deploy/desplegar.sh "$RAMA"; then
         echo "===== $(date -Is) : desplegado ====="
     else
-        echo "===== $(date -Is) : FALLO, la version anterior sigue en linea ====="
+        # Deliberadamente no promete que la version anterior sigue en linea:
+        # si el despliegue murio despues del git pull, el codigo nuevo ya
+        # esta en disco. Revise el registro antes de suponer nada.
+        echo "===== $(date -Is) : FALLO, revise el registro de arriba ====="
     fi
 } >> "$REGISTRO" 2>&1
 
