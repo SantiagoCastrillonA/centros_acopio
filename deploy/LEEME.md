@@ -34,7 +34,7 @@ configurar llaves.
 El repositorio local todavía no tiene remoto. Desde su equipo:
 
 ```bash
-git remote add origin https://github.com/USUARIO/terremoto.git
+git remote add origin https://github.com/USUARIO/centros_acopio.git
 git push -u origin master
 ```
 
@@ -44,8 +44,8 @@ Dentro de la VM:
 
 ```bash
 sudo apt-get update && sudo apt-get install -y git
-git clone https://github.com/USUARIO/terremoto.git /tmp/terremoto
-sudo /tmp/terremoto/deploy/preparar-servidor.sh
+git clone https://github.com/USUARIO/centros_acopio.git /tmp/centros_acopio
+sudo /tmp/centros_acopio/deploy/preparar-servidor.sh
 ```
 
 El script instala Nginx, PHP 8.3, MySQL 8 y Composer, crea 2 GB de swap y ajusta PHP-FPM
@@ -61,24 +61,24 @@ sudo mysql_secure_installation
 Luego, con una contraseña larga y distinta de la de root:
 
 ```bash
-sudo mysql -e "CREATE DATABASE terremoto CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-sudo mysql -e "CREATE USER 'terremoto'@'localhost' IDENTIFIED BY 'PONGA_AQUI_UNA_CONTRASENA_LARGA';"
-sudo mysql -e "GRANT ALL PRIVILEGES ON terremoto.* TO 'terremoto'@'localhost'; FLUSH PRIVILEGES;"
+sudo mysql -e "CREATE DATABASE centros_acopio CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+sudo mysql -e "CREATE USER 'centros_acopio'@'localhost' IDENTIFIED BY 'PONGA_AQUI_UNA_CONTRASENA_LARGA';"
+sudo mysql -e "GRANT ALL PRIVILEGES ON centros_acopio.* TO 'centros_acopio'@'localhost'; FLUSH PRIVILEGES;"
 ```
 
 Aplicar la configuración para máquinas de poca memoria:
 
 ```bash
-sudo cp /tmp/terremoto/deploy/mysql-vm-pequena.cnf /etc/mysql/mysql.conf.d/zz-vm-pequena.cnf
+sudo cp /tmp/centros_acopio/deploy/mysql-vm-pequena.cnf /etc/mysql/mysql.conf.d/zz-vm-pequena.cnf
 sudo systemctl restart mysql
 ```
 
 ## 5. Instalar la aplicación
 
 ```bash
-sudo mv /tmp/terremoto /var/www/terremoto
-sudo chown -R $USER:www-data /var/www/terremoto
-cd /var/www/terremoto
+sudo mv /tmp/centros_acopio /var/www/centros_acopio
+sudo chown -R $USER:www-data /var/www/centros_acopio
+cd /var/www/centros_acopio
 
 cp deploy/env.produccion.ejemplo .env
 nano .env          # completar DB_PASSWORD y APP_URL
@@ -91,9 +91,9 @@ php artisan key:generate
 ## 6. Publicar con Nginx
 
 ```bash
-sudo cp deploy/nginx-terremoto.conf /etc/nginx/sites-available/terremoto
-sudo nano /etc/nginx/sites-available/terremoto     # reemplazar SU_DOMINIO_O_IP
-sudo ln -s /etc/nginx/sites-available/terremoto /etc/nginx/sites-enabled/
+sudo cp deploy/nginx-centros_acopio.conf /etc/nginx/sites-available/centros_acopio
+sudo nano /etc/nginx/sites-available/centros_acopio     # reemplazar SU_DOMINIO_O_IP
+sudo ln -s /etc/nginx/sites-available/centros_acopio /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl reload nginx
 ```
@@ -103,7 +103,7 @@ Abra `http://IP_EXTERNA/` en el navegador. Debe verse la portada con el estado v
 ## 7. Crear el usuario del panel
 
 ```bash
-cd /var/www/terremoto && php artisan make:filament-user
+cd /var/www/centros_acopio && php artisan make:filament-user
 ```
 
 ## 8. HTTPS
@@ -129,7 +129,7 @@ credenciales ni recibe datos.
 ## Despliegues siguientes
 
 ```bash
-cd /var/www/terremoto && ./deploy/desplegar.sh
+cd /var/www/centros_acopio && ./deploy/desplegar.sh
 ```
 
 ## Respaldos
@@ -138,7 +138,7 @@ En una herramienta de emergencia, perder el inventario es perder la operación. 
 respaldo diario, fuera de la máquina:
 
 ```bash
-mysqldump -u terremoto -p terremoto | gzip > ~/terremoto-$(date +%F).sql.gz
+mysqldump -u centros_acopio -p centros_acopio | gzip > ~/centros_acopio-$(date +%F).sql.gz
 ```
 
 Automatícelo con `cron` y copie el archivo a otro lugar. Un respaldo que vive en el mismo
@@ -148,7 +148,7 @@ disco que la base no es un respaldo.
 
 | Síntoma | Dónde mirar |
 |---|---|
-| Error 502 | `sudo tail -50 /var/log/nginx/terremoto-error.log` y `systemctl status php8.3-fpm` |
+| Error 502 | `sudo tail -50 /var/log/nginx/centros_acopio-error.log` y `systemctl status php8.3-fpm` |
 | Error 500 | `tail -50 storage/logs/laravel.log` |
 | La página no cambia tras desplegar | Falta `sudo systemctl reload php8.3-fpm` (opcache) |
 | MySQL se cae solo | Falta la swap, o no se aplicó `zz-vm-pequena.cnf` |

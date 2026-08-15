@@ -10,7 +10,7 @@
 
 set -euo pipefail
 
-RUTA_APP="/var/www/terremoto"
+RUTA_APP="/var/www/centros_acopio"
 
 if [[ $EUID -ne 0 ]]; then
     echo "Ejecutelo con sudo." >&2
@@ -78,4 +78,4 @@ echo "  1. sudo mysql_secure_installation"
 echo "  2. Crear la base y el usuario (ver deploy/LEEME.md)"
 echo "  3. Copiar deploy/mysql-vm-pequena.cnf a /etc/mysql/mysql.conf.d/"
 echo "  4. Clonar el repositorio en $RUTA_APP"
-echo "  5. Copiar deploy/nginx-terremoto.conf a /etc/nginx/sites-available/"
+echo "  5. Copiar deploy/nginx-centros_acopio.conf a /etc/nginx/sites-available/"

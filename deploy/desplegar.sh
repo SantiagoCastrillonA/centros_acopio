@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Despliega la version actual de la rama en el servidor.
-# Se ejecuta en la VM, dentro de /var/www/terremoto:
+# Se ejecuta en la VM, dentro de /var/www/centros_acopio:
 #
 #   ./deploy/desplegar.sh
 #
@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-RUTA_APP="/var/www/terremoto"
+RUTA_APP="/var/www/centros_acopio"
 RAMA="${1:-master}"
 
 cd "$RUTA_APP"

@@ -1,9 +1,9 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "santiago/centros_acopio",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "Catalogo publico de necesidades de centros de acopio y albergues.",
+    "keywords": ["acopio", "albergues", "donaciones"],
     "license": "MIT",
     "require": {
         "php": "^8.2",
