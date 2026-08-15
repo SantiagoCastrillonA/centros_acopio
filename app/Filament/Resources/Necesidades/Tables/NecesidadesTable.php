@@ -6,6 +6,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
@@ -14,11 +15,25 @@ class NecesidadesTable
     public static function configure(Table $table): Table
     {
         return $table
+            // Agrupado por centro y plegado: un coordinador trabaja un punto
+            // a la vez, y ver el mismo nombre repetido veinte veces solo
+            // gasta pantalla.
+            ->groups([
+                Group::make('centro.nombre')
+                    ->label('Centro')
+                    ->titlePrefixedWithLabel(false)
+                    ->collapsible(),
+            ])
+            ->defaultGroup('centro.nombre')
+            ->groupingSettingsInDropdownOnDesktop()
             ->columns([
                 TextColumn::make('centro.nombre')
                     ->label('Centro')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    // Dentro del grupo el nombre del centro ya esta en la
+                    // cabecera: la columna se puede encender si hace falta.
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('item.nombre')
                     ->label('Insumo')
@@ -79,6 +94,10 @@ class NecesidadesTable
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('updated_at', 'desc');
+            // Dentro de cada centro, primero lo urgente y lo que mas lejos
+            // esta de cubrirse. FIELD() y CAST son de MySQL, el motor elegido.
+            ->modifyQueryUsing(fn ($query) => $query
+                ->orderByRaw("FIELD(prioridad, 'alta', 'media', 'baja')")
+                ->orderByRaw('GREATEST(CAST(cantidad_requerida AS SIGNED) - CAST(cantidad_cubierta AS SIGNED), 0) DESC'));
     }
 }

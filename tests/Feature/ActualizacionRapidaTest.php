@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Necesidades\Pages\ListNecesidades;
 use App\Filament\Widgets\NecesidadesUrgentes;
 use App\Filament\Widgets\ResumenGeneral;
 use App\Livewire\ActualizacionRapida;
@@ -103,6 +104,20 @@ class ActualizacionRapidaTest extends TestCase
             ->test(NecesidadesUrgentes::class)
             ->assertCanSeeTableRecords([$pendiente])
             ->assertCanNotSeeTableRecords([$cubierta]);
+    }
+
+    public function test_la_tabla_de_necesidades_agrupa_por_centro(): void
+    {
+        $necesidad = $this->centroConNecesidad();
+
+        $componente = Livewire::actingAs(User::factory()->create())
+            ->test(ListNecesidades::class)
+            ->assertCanSeeTableRecords([$necesidad]);
+
+        $grupo = $componente->instance()->getTable()->getDefaultGroup();
+
+        $this->assertSame('centro.nombre', $grupo?->getId());
+        $this->assertTrue($grupo?->isCollapsible());
     }
 
     public function test_sumar_y_restar_guardan_de_inmediato(): void

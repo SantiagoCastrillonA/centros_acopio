@@ -27,6 +27,9 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            // En celular el menu ya es hamburguesa; esto agrega el mismo
+            // plegado en pantallas grandes, para dejarle el ancho a la tabla.
+            ->sidebarCollapsibleOnDesktop()
             ->colors([
                 'primary' => Color::Amber,
             ])
