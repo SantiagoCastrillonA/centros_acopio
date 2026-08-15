@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('titulo', 'Centros de acopio y albergues')</title>
     <meta name="description" content="@yield('descripcion', 'Qué se necesita y dónde llevarlo. Centros de acopio y albergues activos.')">
+
+    {{-- PWA: se puede instalar en el celular y abrir sin señal. --}}
+    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+    <meta name="theme-color" content="#0b5394">
+    <link rel="icon" href="{{ asset('iconos/icono-192.png') }}" sizes="192x192">
+    <link rel="apple-touch-icon" href="{{ asset('iconos/icono-apple-180.png') }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Acopio">
     <style>
         /*
          * Sin fuentes externas y sin CSS de terceros: la pagina tiene que
@@ -305,5 +313,18 @@
 </div>
 
 @stack('scripts')
+
+{{-- El service worker es opcional: si el navegador no lo soporta o falla
+     el registro, la pagina funciona igual. Solo se registra sobre HTTPS
+     (o localhost), que es lo unico que los navegadores permiten. --}}
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('/sw.js').catch(function () {
+                // Sin caché offline, pero la página sigue sirviendo.
+            });
+        });
+    }
+</script>
 </body>
 </html>

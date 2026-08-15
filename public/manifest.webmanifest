@@ -1,0 +1,33 @@
+{
+    "name": "Centros de acopio y albergues",
+    "short_name": "Acopio",
+    "description": "Qué se necesita y dónde llevarlo. Centros de acopio y albergues activos.",
+    "lang": "es-CO",
+    "dir": "ltr",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "theme_color": "#0b5394",
+    "background_color": "#eef2f6",
+    "icons": [
+        {
+            "src": "/iconos/icono-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/iconos/icono-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/iconos/icono-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

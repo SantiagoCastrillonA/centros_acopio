@@ -26,6 +26,10 @@ Route::post('/turno/{turno}', [InscripcionPublicaController::class, 'store'])
 
 Route::view('/privacidad', 'publico.privacidad')->name('publico.privacidad');
 
+// La sirve el service worker cuando no hay senal y la pagina pedida no
+// estaba guardada.
+Route::view('/sin-conexion', 'publico.sin-conexion')->name('publico.sin_conexion');
+
 /*
  * Actualizacion rapida: la usa el coordinador desde el celular, parado en
  * la bodega. Va detras de auth porque escribe sobre el inventario.
