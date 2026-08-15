@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Items\Pages\ListItems;
 use App\Filament\Resources\Necesidades\Pages\ListNecesidades;
 use App\Filament\Widgets\NecesidadesUrgentes;
 use App\Filament\Widgets\ResumenGeneral;
@@ -149,6 +150,33 @@ class ActualizacionRapidaTest extends TestCase
             ->assertDontSee('Está viendo la página pública', false)
             // Salvo la puerta de entrada para coordinadores, en el pie.
             ->assertSee('Soy coordinador de un centro');
+    }
+
+    public function test_publica_varios_insumos_en_un_centro_de_una_vez(): void
+    {
+        $necesidad = $this->centroConNecesidad();
+        $centro = $necesidad->centro;
+
+        $agua = Item::create(['nombre' => 'Agua embotellada', 'unidad' => 'botella', 'categoria' => 'agua', 'activo' => true]);
+        $arroz = Item::create(['nombre' => 'Arroz', 'unidad' => 'kg', 'categoria' => 'alimento', 'activo' => true]);
+
+        Livewire::actingAs(User::factory()->create())
+            ->test(ListItems::class)
+            // La Colchoneta ya esta publicada en ese centro: no se debe tocar.
+            ->callTableBulkAction('asignar', [$agua->id, $arroz->id, $necesidad->item_id], [
+                'centro_id' => $centro->id,
+                'prioridad' => 'alta',
+                'cantidad_requerida' => 100,
+            ]);
+
+        $this->assertSame(3, $centro->necesidades()->count());
+
+        $nueva = $centro->necesidades()->where('item_id', $agua->id)->firstOrFail();
+        $this->assertSame(100, $nueva->cantidad_requerida);
+        $this->assertSame('alta', $nueva->prioridad);
+
+        // La que ya existia conserva lo que el coordinador tenia recibido.
+        $this->assertSame(20, $necesidad->fresh()->cantidad_cubierta);
     }
 
     public function test_sumar_y_restar_guardan_de_inmediato(): void
